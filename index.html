@@ -4,18 +4,40 @@
         <script src="flock.js"></script>
         <script>
 $(document).ready(function() {
+    var canvas = document.getElementById('pond-canvas');
+    var context = canvas.getContext('2d');
+
     var school = flock();
-    school.tick(0.1);
-    school.tick(0.1);
-    school.tick(0.1);
-    school.tick(0.1);
-    school.tick(0.1);
-    school.tick(0.1);
-    school.tick(0.1);
+    
+    requestAnimationFrame(frame);
+    function frame() {
+        school.tick(0.1);
+        render();
+        requestAnimationFrame(frame);
+    }
+
+    function render() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        var bodies = school.bodies();
+        for (var i = 0; i < bodies.length; i++) {
+            context.beginPath();
+            context.arc(
+                bodies[i].x() * canvas.width,
+                bodies[i].y() * canvas.height,
+                5,
+                0,
+                2 * Math.PI,
+                false
+            )
+            context.closePath();
+            context.fill();
+        }
+    }
 });
         </script>
     </head>
     <body>
-        <canvas id="pond-canvas"></canvas>
+        <canvas id="pond-canvas" width="500px" height="500px"></canvas>
+        <audio src="dubadub.m4a" autoplay="true"></audio>
     </body>
 </html>

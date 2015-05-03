@@ -1,21 +1,25 @@
 var DEFAULT_BODIES = [
-    body(0.1, 0.1),
-    body(0.2, 0.2),
-    body(0.3, 0.3),
-    body(0.4, 0.4),
-    body(0.5, 0.5),
-    body(0.6, 0.6),
-    body(0.7, 0.7),
-    body(0.8, 0.8),
-    body(0.9, 0.9)
+    body(0.2, 0.3),
+    body(0.21, 0.15),
+    body(0.35, 0.55),
+    body(0.24, 0.41),
+    body(0.51, 0.59),
+    body(0.6, 0.2),
+    body(0.7, 0.5),
+    body(0.8, 0.2),
+    body(0.9, 0.6)
 ]
 
 function flock(initialBodies) {
     var ATTRACT_THRESHOLD_DIST = 0.5;
-    var REPELL_THRESHOLD_DIST = 0.1;
-    var REPELL_MULTIPLIER = 0.01;
-    var ATTRACT_MULTIPLIER = 0.01;
-    var ALIGN_MULTIPLIER = 0.01;
+    var REPEL_THRESHOLD_DIST = 0.06;
+    var REPEL_MULTIPLIER = 0.2;
+    var ATTRACT_MULTIPLIER = 0.02;
+    var ALIGN_MULTIPLIER = 0.008;
+    var CENTER_MULTIPLIER = 0.01;
+    var TARGET_SPEED = 0.1;
+    var TARGET_SPEED_MULTIPLIER = 0.1;
+
     var _bodies = initialBodies || DEFAULT_BODIES;
 
     function bodies() {
@@ -24,14 +28,16 @@ function flock(initialBodies) {
 
     function tick(dt) {
         for (var i = 0; i < _bodies.length; i++) {
-            _repell(i);
+            _repel(i);
             _attract(i);
             _align(i);
+            _targetPosition(i);
+            _targetSpeed(i);
             _bodies[i].tick(dt);
         }
     }
 
-    function _repell(idx) {
+    function _repel(idx) {
         var b1 = _bodies[idx];
         var dvx = 0;
         var dvy = 0;
@@ -40,10 +46,12 @@ function flock(initialBodies) {
             
             var b2 = _bodies[j];
             var dist = _distance(b1, b2);
-            if (dist >= REPELL_THRESHOLD_DIST) continue;
+            if (dist >= REPEL_THRESHOLD_DIST) continue;
+            var d = dist / REPEL_THRESHOLD_DIST;
+            var mult = (1 - d*d); // max repulsion at zero dist
 
-            dvx += REPELL_MULTIPLIER * (b1.x() - b2.x());
-            dvy += REPELL_MULTIPLIER * (b1.y() - b2.y());
+            dvx += REPEL_MULTIPLIER * mult * (b1.x() - b2.x());
+            dvy += REPEL_MULTIPLIER * mult * (b1.y() - b2.y());
         }
 
         b1.vx(b1.vx() + dvx);
@@ -86,6 +94,20 @@ function flock(initialBodies) {
         }
         b1.vx(b1.vx() + (avg.vx - b1.vx()) * ALIGN_MULTIPLIER);
         b1.vy(b1.vy() + (avg.vy - b1.vy()) * ALIGN_MULTIPLIER);
+    }
+
+    function _targetPosition(idx) {
+        var b1 = _bodies[idx];
+        b1.vx(b1.vx() + (0.5 - b1.x()) * CENTER_MULTIPLIER);
+        b1.vy(b1.vy() + (0.5 - b1.y()) * CENTER_MULTIPLIER);
+    }
+
+    function _targetSpeed(idx) {
+        var b1 = _bodies[idx];
+        var v = Math.sqrt(b1.vx()*b1.vx() + b1.vy()*b1.vy());
+        var d = TARGET_SPEED - v;
+        b1.vx(b1.vx() + b1.vx() / v * d * TARGET_SPEED_MULTIPLIER);
+        b1.vy(b1.vy() + b1.vy() / v * d * TARGET_SPEED_MULTIPLIER);
     }
 
     function _distance(b1, b2) {
