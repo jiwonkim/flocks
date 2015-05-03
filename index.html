@@ -1,43 +1,51 @@
 <html>
     <head>
-        <script src="jquery-1.11.2.min.js"></script>
-        <script src="flock.js"></script>
-        <script>
-$(document).ready(function() {
-    var canvas = document.getElementById('pond-canvas');
-    var context = canvas.getContext('2d');
-
-    var school = flock();
-    
-    requestAnimationFrame(frame);
-    function frame() {
-        school.tick(0.1);
-        render();
-        requestAnimationFrame(frame);
-    }
-
-    function render() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        var bodies = school.bodies();
-        for (var i = 0; i < bodies.length; i++) {
-            context.beginPath();
-            context.arc(
-                bodies[i].x() * canvas.width,
-                bodies[i].y() * canvas.height,
-                5,
-                0,
-                2 * Math.PI,
-                false
-            )
-            context.closePath();
-            context.fill();
-        }
-    }
-});
-        </script>
+        <style>
+            canvas {
+                background-color:#ddf;
+            }
+        </style>
     </head>
     <body>
-        <canvas id="pond-canvas" width="500px" height="500px"></canvas>
+        <canvas id="pond-canvas" width="700" height="700"></canvas>
         <audio src="dubadub.m4a" autoplay="true"></audio>
+        <script src="flock.js"></script>
+        <script>
+            var canvas = document.getElementById('pond-canvas');
+            var context = canvas.getContext('2d');
+
+            var school = flock();
+
+            canvas.addEventListener('click', function(e) {
+                school.center(
+                    e.clientX / canvas.width,
+                    e.clientY / canvas.height);
+            });
+            
+            requestAnimationFrame(frame);
+            function frame() {
+                school.tick(0.1);
+                render();
+                requestAnimationFrame(frame);
+            }
+
+            function render() {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                var bodies = school.bodies();
+                for (var i = 0; i < bodies.length; i++) {
+                    context.beginPath();
+                    context.arc(
+                        bodies[i].x() * canvas.width,
+                        bodies[i].y() * canvas.height,
+                        5,
+                        0,
+                        2 * Math.PI,
+                        false
+                    )
+                    context.closePath();
+                    context.fill();
+                }
+            }
+        </script>
     </body>
 </html>

@@ -18,12 +18,21 @@ function flock(initialBodies) {
     var ALIGN_MULTIPLIER = 0.008;
     var CENTER_MULTIPLIER = 0.01;
     var TARGET_SPEED = 0.1;
-    var TARGET_SPEED_MULTIPLIER = 0.1;
+    var TARGET_SPEED_MULTIPLIER = 0.15;
 
     var _bodies = initialBodies || DEFAULT_BODIES;
+    var _center = {x:0.5, y:0.5};
 
     function bodies() {
         return _bodies;
+    }
+
+    /**
+     * Centers the flock on a new position.
+     * X and Y should be in [0, 1]
+     */
+    function center(x, y) {
+        _center = {x:x , y:y};
     }
 
     function tick(dt) {
@@ -98,8 +107,8 @@ function flock(initialBodies) {
 
     function _targetPosition(idx) {
         var b1 = _bodies[idx];
-        b1.vx(b1.vx() + (0.5 - b1.x()) * CENTER_MULTIPLIER);
-        b1.vy(b1.vy() + (0.5 - b1.y()) * CENTER_MULTIPLIER);
+        b1.vx(b1.vx() + (_center.x - b1.x()) * CENTER_MULTIPLIER);
+        b1.vy(b1.vy() + (_center.y - b1.y()) * CENTER_MULTIPLIER);
     }
 
     function _targetSpeed(idx) {
@@ -118,6 +127,7 @@ function flock(initialBodies) {
     
     return {
         tick: tick,
+        center: center,
         bodies: bodies
     };
 }
