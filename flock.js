@@ -58,6 +58,21 @@ function flock(numBodies, initialSettings) {
         );
     }
 
+    function gather(strength, duration) {
+        strength = strength || 2;
+        duration = duration || 1000;
+        settings(
+            {
+                neighborThresholdDist: _getSetting('neighborThresholdDist') * strength,
+                repulsionThresholdDist: _getSetting('repulsionThresholdDist') / strength,
+                repulsion: _getSetting('repulsion') / strength,
+                attraction: _getSetting('attraction') * strength,
+                alignment: _getSetting('alignment') / strength
+            },
+            duration
+        );
+    }
+
     function tick(dt) {
         for (var i = 0; i < _bodies.length; i++) {
             _repulse(i);
@@ -249,6 +264,7 @@ function flock(numBodies, initialSettings) {
     return {
         tick: tick,
         scatter: scatter,
+        gather: gather,
         bodies: bodies
     };
 }
