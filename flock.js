@@ -88,6 +88,9 @@ function flock(numBodies, initialSettings) {
     }
 
     function settings(val, duration) {
+        if (val === undefined) {
+            return _settings;
+        }
         if (!duration) {
             settings = val;
             return;
@@ -262,10 +265,16 @@ function flock(numBodies, initialSettings) {
     }
     
     return {
+        // actions
         tick: tick,
         scatter: scatter,
         gather: gather,
-        bodies: bodies
+        //seek: seek,
+        //flee: flee,
+
+        // getters & setters
+        bodies: bodies,
+        settings: settings
     };
 }
 
