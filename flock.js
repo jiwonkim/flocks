@@ -6,7 +6,7 @@ function flock(numBodies) {
     var ATTRACT_MULTIPLIER = 0.01;
     var ALIGN_MULTIPLIER = 0.02;
 
-    var TARGET_SPEED = 0.1;
+    var TARGET_SPEED = 0.05;
     var TARGET_SPEED_MULTIPLIER = 0.15;
 
     var _scatter = 0;
@@ -55,15 +55,8 @@ function flock(numBodies) {
             _align(i);
             _enforceBounds(i);
             _targetSpeed(i);
-            _randomize(i);
             _bodies[i].tick(dt);
         }
-    }
-
-    function _randomize(i) {
-        var body = _bodies[i];
-        body.vx(body.vx() + (Math.random() - 0.5) * 0.02);
-        body.vy(body.vy() + (Math.random() - 0.5) * 0.02);
     }
 
     function _repel(idx, strength) {

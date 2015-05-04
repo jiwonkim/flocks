@@ -2,7 +2,11 @@
     <head>
         <style>
             canvas {
-                background-color:#ddf;
+                background: -webkit-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* Chrome 10+, Saf5.1+ */
+                background:    -moz-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* FF3.6+ */
+                background:     -ms-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* IE10 */
+                background:      -o-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* Opera 11.10+ */
+                background:         linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* W3C */
             }
         </style>
     </head>
@@ -11,12 +15,9 @@
         <audio src="dubadub.m4a" autoplay="true"></audio>
         <script src="flock.js"></script>
         <script>
-            var fishIcon = new Image();
-            fishIcon.loaded = false;
-            fishIcon.src = 'fish.png';
-            fishIcon.onload = function() {
-                fishIcon.loaded = true;
-            };
+            var fishPath = new Path2D('M 1.71 0.94 C 5.18 0.36 8.09 2.16 10.97 3.76 C 20.04 2.03 30.48 0.16 38.52 6.05 C 35.34 9.62 30.29 9.92 25.89 10.66 C 20.52 11.68 15.27 9.71 10.20 8.21 C 7.52 9.65 4.63 11.63 1.44 10.85 C 0.56 8.40 3.98 7.69 5.33 6.28 C 3.90 4.66 2.61 2.91 1.71 0.94 Z');
+            var fishWidth = 50;
+            var fishHeight = 15;
 
             var canvas = document.getElementById('pond-canvas');
             var context = canvas.getContext('2d');
@@ -41,10 +42,6 @@
             }
 
             function render() {
-                if (!fishIcon.loaded) {
-                    return;
-                }
-
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 context.save();
 
@@ -55,11 +52,17 @@
                         bodies[i].y() * canvas.height
                     );
                     context.rotate(Math.atan2(bodies[i].vy(), bodies[i].vx()));
-                    context.drawImage(
-                        fishIcon,
-                        -fishIcon.width / 2,
-                        -fishIcon.height / 2
-                    );
+                    context.translate(-fishWidth/2, -fishHeight/2);
+
+                    context.lineWidth = 2;
+                    context.stroke(fishPath);
+
+                    var gradient = context.createLinearGradient(0, 0, 50, 0);
+                    gradient.addColorStop(0, '#FF8008');
+                    gradient.addColorStop(1, '#FFC837');
+                    context.fillStyle = gradient;
+                    context.fill(fishPath);
+
                     context.restore();
                     context.save();
                 }
