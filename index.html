@@ -11,13 +11,20 @@
         <audio src="dubadub.m4a" autoplay="true"></audio>
         <script src="flock.js"></script>
         <script>
+            var fishIcon = new Image();
+            fishIcon.loaded = false;
+            fishIcon.src = 'fish.png';
+            fishIcon.onload = function() {
+                fishIcon.loaded = true;
+            };
+
             var canvas = document.getElementById('pond-canvas');
             var context = canvas.getContext('2d');
 
             var school = flock(50);
 
             canvas.addEventListener('click', function(e) {
-                school.scatter(2000);
+                school.scatter(2000, 2);
                 /*
                 school.center(
                     e.clientX / canvas.width,
@@ -34,20 +41,27 @@
             }
 
             function render() {
+                if (!fishIcon.loaded) {
+                    return;
+                }
+
                 context.clearRect(0, 0, canvas.width, canvas.height);
+                context.save();
+
                 var bodies = school.bodies();
                 for (var i = 0; i < bodies.length; i++) {
-                    context.beginPath();
-                    context.arc(
+                    context.translate(    
                         bodies[i].x() * canvas.width,
-                        bodies[i].y() * canvas.height,
-                        5,
-                        0,
-                        2 * Math.PI,
-                        false
-                    )
-                    context.closePath();
-                    context.fill();
+                        bodies[i].y() * canvas.height
+                    );
+                    context.rotate(Math.atan2(bodies[i].vy(), bodies[i].vx()));
+                    context.drawImage(
+                        fishIcon,
+                        -fishIcon.width / 2,
+                        -fishIcon.height / 2
+                    );
+                    context.restore();
+                    context.save();
                 }
             }
         </script>

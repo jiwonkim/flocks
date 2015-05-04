@@ -1,9 +1,9 @@
 function flock(numBodies) {
-    var NEIGHBOR_THRESHOLD_DIST = 0.3;
+    var NEIGHBOR_THRESHOLD_DIST = 0.2;
     var REPEL_THRESHOLD_DIST = 0.07;
 
     var REPEL_MULTIPLIER = 0.25;
-    var ATTRACT_MULTIPLIER = 0.05;
+    var ATTRACT_MULTIPLIER = 0.01;
     var ALIGN_MULTIPLIER = 0.02;
 
     var TARGET_SPEED = 0.1;
@@ -38,16 +38,16 @@ function flock(numBodies) {
 
     function scatter(count, strength) {
         for (var i = 0; i < _bodies.length; i++) {
-            _repel(i, strength || 2.);
+            _repel(i, strength);
         }
-        _scatter += count || 1000;
+        _scatter += count;
     }
 
     function tick(dt) {
         for (var i = 0; i < _bodies.length; i++) {
             if (_scatter > _scatterSince) {
                _scatterSince++;
-            } else if (_scatter === _scatterSince) {
+            } else {
                 _scatter = _scatterSince = 0;
             }
             _repel(i);
@@ -97,6 +97,7 @@ function flock(numBodies) {
 
     function _attract(idx) {
         var strength = _scatter > 0 ? _scatterSince / _scatter : 1.;
+
         var b1 = _bodies[idx];
         var sum = {x: 0, y: 0};
         var neighborCount = 0;
@@ -111,6 +112,7 @@ function flock(numBodies) {
             sum.x += b2.x(); 
             sum.y += b2.y();
         }
+        if (neighborCount === 0) return;
 
         var centroid = {
             x: sum.x / neighborCount,
@@ -136,6 +138,7 @@ function flock(numBodies) {
             sum.vx += b2.vx(); 
             sum.vy += b2.vy();
         }
+        if (neighborCount === 0) return;
 
         var avg = {
             vx: sum.vx / neighborCount,
