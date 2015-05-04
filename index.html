@@ -1,20 +1,9 @@
 <html>
     <head>
-        <style>
-            canvas {
-                background: -webkit-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* Chrome 10+, Saf5.1+ */
-                background:    -moz-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* FF3.6+ */
-                background:     -ms-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* IE10 */
-                background:      -o-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* Opera 11.10+ */
-                background:         linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* W3C */
-            }
-        </style>
-    </head>
-    <body>
-        <canvas id="pond-canvas" width="700" height="700"></canvas>
-        <audio src="dubadub.m4a" autoplay="true"></audio>
+        <script src="jquery-1.11.2.min.js"></script>
         <script src="flock.js"></script>
         <script>
+        $(document).ready(function() {
             var fishPath = new Path2D('M 1.71 0.94 C 5.18 0.36 8.09 2.16 10.97 3.76 C 20.04 2.03 30.48 0.16 38.52 6.05 C 35.34 9.62 30.29 9.92 25.89 10.66 C 20.52 11.68 15.27 9.71 10.20 8.21 C 7.52 9.65 4.63 11.63 1.44 10.85 C 0.56 8.40 3.98 7.69 5.33 6.28 C 3.90 4.66 2.61 2.91 1.71 0.94 Z');
             var fishWidth = 50;
             var fishHeight = 15;
@@ -25,7 +14,7 @@
             var school = flock(50);
 
             canvas.addEventListener('click', function(e) {
-                school.scatter(2000, 2);
+                school.scatter();
                 /*
                 school.center(
                     e.clientX / canvas.width,
@@ -67,6 +56,20 @@
                     context.save();
                 }
             }
+        });
         </script>
+        <style>
+            canvas {
+                background: -webkit-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* Chrome 10+, Saf5.1+ */
+                background:    -moz-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* FF3.6+ */
+                background:     -ms-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* IE10 */
+                background:      -o-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* Opera 11.10+ */
+                background:         linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* W3C */
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="pond-canvas" width="700" height="700"></canvas>
+        <audio src="dubadub.m4a" autoplay="true"></audio>
     </body>
 </html>
