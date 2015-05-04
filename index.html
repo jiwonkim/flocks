@@ -14,12 +14,16 @@
             var canvas = document.getElementById('pond-canvas');
             var context = canvas.getContext('2d');
 
-            var school = flock();
+            var school = flock(50);
 
             canvas.addEventListener('click', function(e) {
+                school.scatter(2000);
+                /*
                 school.center(
                     e.clientX / canvas.width,
-                    e.clientY / canvas.height);
+                    e.clientY / canvas.height
+                );
+                */
             });
             
             requestAnimationFrame(frame);
