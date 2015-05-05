@@ -1,7 +1,7 @@
 var DEFAULT_SETTINGS = {
     neighborThresholdDist: 0.2,
-    repulsionThresholdDist: 0.07,
-    repulsion: 0.25,
+    repulsionThresholdDist: 0.05,
+    repulsion: 0.2,
     attraction: 0.01,
     alignment: 0.01,
     targetSpeed: 0.05,
@@ -12,14 +12,18 @@ function flock(numBodies, initialSettings) {
     var _settings = _initSettings(settings);
     var _tmpSettings = null;
 
+    var _fascination = null;
+    var _abomination = null;
+
     // Create bodies at random initial positions and no velocity
     var _bodies = [];
     for (var i = 0; i < numBodies; i++) {
         _bodies.push(body(Math.random(), Math.random()));
     }
 
-    var _fascination = null;
-    var _abomination = null;
+    // then give them a central push by calling gather on the flock
+    gather();
+
 
     /** 
      * Returns the list of bodies that belong to the flock
@@ -93,10 +97,13 @@ function flock(numBodies, initialSettings) {
             _repulse(i);
             _attract(i);
             _align(i);
+
             _seek(i);
             _flee(i);
-            _enforceBounds(i);
+
+            //_enforceBounds(i);
             _targetSpeed(i);
+
             _bodies[i].tick(dt);
         }
         if (_tmpSettings) {
@@ -360,8 +367,8 @@ function body(x0, y0) {
     }
 
     function tick(dt) {
-        _x += _vx * dt;
-        _y += _vy * dt;
+        _x = (1 + _x + _vx * dt) % 1;
+        _y = (1 + _y + _vy * dt) % 1;
     }
 
     return {

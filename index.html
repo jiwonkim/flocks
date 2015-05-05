@@ -11,7 +11,7 @@
             var canvas = document.getElementById('pond-canvas');
             var context = canvas.getContext('2d');
 
-            var school = flock(50);
+            var school = flock(200);
 
             var toggle = true;
             $(canvas).click(function(evt) {
@@ -28,14 +28,14 @@
                         evt.offsetY / canvas.height,
                         5
                     );
-                    school.scatter();
+                    school.scatter(1.5);
                 }
                 toggle = !toggle;
             });
 
             $(window).keypress(function(evt) {
                 if (evt.which === 32) { // the spacebar
-                    school.scatter();
+                    school.scatter(1);
                     return;
                 }
                 if (evt.which === 103) { // the 'g' key
@@ -60,10 +60,13 @@
                 var bodies = school.bodies();
                 for (var i = 0; i < bodies.length; i++) {
                     context.translate(    
-                        bodies[i].x() * canvas.width,
-                        bodies[i].y() * canvas.height
+                        bodies[i].x() * canvas.width * 1.1 - canvas.width * 0.1,
+                        bodies[i].y() * canvas.height * 1.1 - canvas.height * 0.1
                     );
                     context.rotate(Math.atan2(bodies[i].vy(), bodies[i].vx()));
+                    if (i % 5 === 0) {
+                        context.scale(0.8, 0.8);
+                    }
                     context.translate(-fishWidth/2, -fishHeight/2);
                     context.fill(fishPath);
 
@@ -74,6 +77,10 @@
         });
         </script>
         <style>
+            body {
+                text-align: center;
+            }
+
             canvas {
                 background: -webkit-linear-gradient(180deg, #F0C27B 10%, #4B1248 90%); /* Chrome 10+, Saf5.1+ */
                 background:    -moz-linear-gradient(180deg, #F0C27B 10%, #4B1248 90%); /* FF3.6+ */
@@ -84,7 +91,7 @@
         </style>
     </head>
     <body>
-        <canvas id="pond-canvas" width="700" height="700"></canvas>
+        <canvas id="pond-canvas" width="800" height="800"></canvas>
         <audio src="dubadub.m4a" autoplay="true"></audio>
     </body>
 </html>
