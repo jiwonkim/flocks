@@ -13,16 +13,38 @@
 
             var school = flock(50);
 
-            canvas.addEventListener('click', function(e) {
-                //school.gather();
-                school.scatter();
-                /*
-                school.center(
-                    e.clientX / canvas.width,
-                    e.clientY / canvas.height
-                );
-                */
+            var toggle = true;
+            $(canvas).click(function(evt) {
+                if (toggle) {
+                    school.seek(
+                        evt.offsetX / canvas.width,
+                        evt.offsetY / canvas.height,
+                        5
+                    );
+                    school.gather(2, 500);
+                } else {
+                    school.flee(
+                        evt.offsetX / canvas.width,
+                        evt.offsetY / canvas.height,
+                        5
+                    );
+                    school.scatter();
+                }
+                toggle = !toggle;
             });
+
+            $(window).keypress(function(evt) {
+                if (evt.which === 32) { // the spacebar
+                    school.scatter();
+                    return;
+                }
+                if (evt.which === 103) { // the 'g' key
+                    school.gather();
+                    return;
+                }
+                
+            });
+        
             
             requestAnimationFrame(frame);
             function frame() {

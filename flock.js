@@ -1,24 +1,9 @@
-/*
-var _settings
-var _tempSettings
-
-function settings(val, isTemporary) {
-    returns settings if val === undefined
-    if temporary, then populates currSettings
-    else replaces the current settings
-}
-
-for every tick, the currSettings should linearly ease towards original settings
-
-
-*/
-
 var DEFAULT_SETTINGS = {
     neighborThresholdDist: 0.2,
     repulsionThresholdDist: 0.07,
     repulsion: 0.25,
     attraction: 0.01,
-    alignment: 0.02,
+    alignment: 0.01,
     targetSpeed: 0.05,
     targetSpeedMultiplier: 0.15
 }
@@ -33,8 +18,8 @@ function flock(numBodies, initialSettings) {
         _bodies.push(body(Math.random(), Math.random()));
     }
 
-    // Initial center is midpoint in flock-space (x [0, 1], y [0, 1])
-    var _center = {x:0.5, y:0.5};
+    var _fascination = null;
+    var _abomination = null;
 
     /** 
      * Returns the list of bodies that belong to the flock
@@ -48,11 +33,11 @@ function flock(numBodies, initialSettings) {
         duration = duration || 100;
         settings(
             {
-                neighborThresholdDist: _getSetting('neighborThresholdDist') / strength,
-                repulsionThresholdDist: _getSetting('repulsionThresholdDist') * strength,
-                repulsion: _getSetting('repulsion') * strength,
-                attraction: _getSetting('attraction') / strength,
-                alignment: _getSetting('alignment') / strength
+                neighborThresholdDist: _settings.neighborThresholdDist / strength,
+                repulsionThresholdDist: _settings.repulsionThresholdDist * strength,
+                repulsion: _settings.repulsion * strength,
+                attraction: _settings.attraction / strength,
+                alignment: _settings.alignment / strength
             },
             duration
         );
@@ -63,14 +48,44 @@ function flock(numBodies, initialSettings) {
         duration = duration || 1000;
         settings(
             {
-                neighborThresholdDist: _getSetting('neighborThresholdDist') * strength,
-                repulsionThresholdDist: _getSetting('repulsionThresholdDist') / strength,
-                repulsion: _getSetting('repulsion') / strength,
-                attraction: _getSetting('attraction') * strength,
-                alignment: _getSetting('alignment') / strength
+                neighborThresholdDist: _settings.neighborThresholdDist * strength,
+                repulsionThresholdDist: _settings.repulsionThresholdDist / strength,
+                repulsion: _settings.repulsion / strength,
+                attraction: _settings.attraction * strength,
+                alignment: _settings.alignment / strength
             },
             duration
         );
+    }
+
+    function seek(x, y, strength, duration) {
+        if (strength === undefined) {
+            strength = 2;
+        }
+        if (duration === undefined) {
+            duration = 1000;
+        }
+        _fascination = {
+            x: x, 
+            y: y,
+            strength: strength,
+            decay: -strength / duration
+        };
+    }
+
+    function flee(x, y, strength, duration) {
+        if (strength === undefined) {
+            strength = 2;
+        }
+        if (duration === undefined) {
+            duration = 1000;
+        }
+        _abomination = {
+            x: x, 
+            y: y,
+            strength: strength,
+            decay: -strength / duration
+        };
     }
 
     function tick(dt) {
@@ -78,6 +93,8 @@ function flock(numBodies, initialSettings) {
             _repulse(i);
             _attract(i);
             _align(i);
+            _seek(i);
+            _flee(i);
             _enforceBounds(i);
             _targetSpeed(i);
             _bodies[i].tick(dt);
@@ -233,6 +250,42 @@ function flock(numBodies, initialSettings) {
         b1.vy(b1.vy() + (avg.vy - b1.vy()) * alignment);
     }
 
+    function _seek(idx) {
+        if (!_fascination) {
+            return;
+        }
+        if (_fascination.strength < 0) {
+            _fascination = null;
+            return;
+        }
+
+        var body = _bodies[idx];
+        var dvx = (_fascination.x - body.x()) * 0.01 * _fascination.strength;
+        var dvy = (_fascination.y - body.y()) * 0.01 * _fascination.strength;
+        body.vx(body.vx() + dvx);
+        body.vy(body.vy() + dvy);
+
+        _fascination.strength += _fascination.decay;
+    }
+
+    function _flee(idx) {
+        if (!_abomination) {
+            return;
+        }
+        if (_abomination.strength < 0) {
+            _abomination = null;
+            return;
+        }
+
+        var body = _bodies[idx];
+        var dvx = (body.x() - _abomination.x) * 0.01 * _abomination.strength;
+        var dvy = (body.y() - _abomination.y) * 0.01 * _abomination.strength;
+        body.vx(body.vx() + dvx);
+        body.vy(body.vy() + dvy);
+
+        _abomination.strength += _abomination.decay;
+    }
+
     function _enforceBounds(idx) {
         var body = _bodies[idx];
         if (body.x() < 0) {
@@ -269,8 +322,8 @@ function flock(numBodies, initialSettings) {
         tick: tick,
         scatter: scatter,
         gather: gather,
-        //seek: seek,
-        //flee: flee,
+        seek: seek,
+        flee: flee,
 
         // getters & setters
         bodies: bodies,
