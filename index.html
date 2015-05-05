@@ -43,14 +43,6 @@
                     );
                     context.rotate(Math.atan2(bodies[i].vy(), bodies[i].vx()));
                     context.translate(-fishWidth/2, -fishHeight/2);
-
-                    context.lineWidth = 2;
-                    context.stroke(fishPath);
-
-                    var gradient = context.createLinearGradient(0, 0, 50, 0);
-                    gradient.addColorStop(0, '#FF8008');
-                    gradient.addColorStop(1, '#FFC837');
-                    context.fillStyle = gradient;
                     context.fill(fishPath);
 
                     context.restore();
@@ -61,11 +53,11 @@
         </script>
         <style>
             canvas {
-                background: -webkit-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* Chrome 10+, Saf5.1+ */
-                background:    -moz-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* FF3.6+ */
-                background:     -ms-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* IE10 */
-                background:      -o-linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* Opera 11.10+ */
-                background:         linear-gradient(0deg, #16222A 10%, #3A6073 90%); /* W3C */
+                background: -webkit-linear-gradient(180deg, #F0C27B 10%, #4B1248 90%); /* Chrome 10+, Saf5.1+ */
+                background:    -moz-linear-gradient(180deg, #F0C27B 10%, #4B1248 90%); /* FF3.6+ */
+                background:     -ms-linear-gradient(180deg, #F0C27B 10%, #4B1248 90%); /* IE10 */
+                background:      -o-linear-gradient(180deg, #F0C27B 10%, #4B1248 90%); /* Opera 11.10+ */
+                background:         linear-gradient(180deg, #F0C27B 10%, #4B1248 90%); /* W3C */
             }
         </style>
     </head>
