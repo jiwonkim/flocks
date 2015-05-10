@@ -8,10 +8,13 @@ var DEFAULT_SETTINGS = {
     targetSpeedMultiplier: 0.15
 }
 
+/**
+ * @param {number} numBodies
+ * @param {Object=} initialSettings
+ */
 function flock(numBodies, initialSettings) {
     var _settings = _initSettings(settings);
     var _tmpSettings = null;
-
     var _fascination = null;
     var _abomination = null;
 
@@ -25,6 +28,8 @@ function flock(numBodies, initialSettings) {
     gather();
 
 
+    /** Public Methods **/
+
     /** 
      * Returns the list of bodies that belong to the flock
      */
@@ -32,6 +37,11 @@ function flock(numBodies, initialSettings) {
         return _bodies;
     }
 
+    /**
+     * Scatter the flock away from each other.
+     * @param {number=} strength - a larger number will scatter the flock more abruptly
+     * @param {number=} duration - # ticks the scattering effect will last for
+     */
     function scatter(strength, duration) {
         strength = strength || 2;
         duration = duration || 100;
@@ -47,6 +57,11 @@ function flock(numBodies, initialSettings) {
         );
     }
 
+    /**
+     * Gather the flock towards each other.
+     * @param {number=} strength - a larger number will gather the flock more abruptly and more tightly
+     * @param {number=} duration - # ticks the gathering effect will last for
+     */
     function gather(strength, duration) {
         strength = strength || 2;
         duration = duration || 1000;
@@ -62,6 +77,13 @@ function flock(numBodies, initialSettings) {
         );
     }
 
+    /**
+     * Make the flock gear towards a certain point
+     * @param {number} x
+     * @param {number} y
+     * @param {number=} strength
+     * @param {number=} duration
+     */
     function seek(x, y, strength, duration) {
         if (strength === undefined) {
             strength = 2;
@@ -77,6 +99,13 @@ function flock(numBodies, initialSettings) {
         };
     }
 
+    /**
+     * Make the flock gear away from a certain point
+     * @param {number} x
+     * @param {number} y
+     * @param {number=} strength
+     * @param {number=} duration
+     */
     function flee(x, y, strength, duration) {
         if (strength === undefined) {
             strength = 2;
@@ -92,6 +121,10 @@ function flock(numBodies, initialSettings) {
         };
     }
 
+    /**
+     * Update the entire flock's position and velocity
+     * @param {number} dt - the change in time
+     */
     function tick(dt) {
         for (var i = 0; i < _bodies.length; i++) {
             _repulse(i);
@@ -101,7 +134,6 @@ function flock(numBodies, initialSettings) {
             _seek(i);
             _flee(i);
 
-            //_enforceBounds(i);
             _targetSpeed(i);
 
             _bodies[i].tick(dt);
@@ -111,6 +143,13 @@ function flock(numBodies, initialSettings) {
         }
     }
 
+    /** 
+     * If no value is given, it's a getter that returns the flocks' settings.
+     * If no duration is given, then replace the settings with the given value.
+     * If duration is given, then the given settings are temporary.
+     * @param {Object=} val
+     * @param {number=} duration
+     */
     function settings(val, duration) {
         if (val === undefined) {
             return _settings;
@@ -128,6 +167,13 @@ function flock(numBodies, initialSettings) {
         });
     }
 
+    /** Private Methods **/
+
+    /** 
+     * Create the settings for the flock with the given values.
+     * Use default values for missing keys.
+     * @param {Object} val - settings
+     */
     function _initSettings(val) {
         if (settings === undefined) {
             return DEFAULT_SETTINGS;
@@ -152,6 +198,12 @@ function flock(numBodies, initialSettings) {
         }
     }
 
+    /**
+     * Temporary settings should decay towards the original settings
+     * with each tick. When all temporary settings are back to the
+     * original values, we remove temporary settings and go back to
+     * the original settings.
+     */
     function _decayTmpSettings() {
         var count = 0;
         var done = 0;
@@ -171,6 +223,10 @@ function flock(numBodies, initialSettings) {
         }
     }
 
+    /**
+     * Grab the current setting for the given key.
+     * @param {string} key - the setting to grab
+     */
     function _getSetting(key) {
         if (!_tmpSettings || !_tmpSettings[key]) {
             return _settings[key];
@@ -178,6 +234,10 @@ function flock(numBodies, initialSettings) {
         return _tmpSettings[key].val;
     }
 
+    /**
+     * Repulse the given body away from its neighbors.
+     * @param {number} idx - the index of the body
+     */
     function _repulse(idx) {
         var threshold = _getSetting('repulsionThresholdDist');
         var repulsion = _getSetting('repulsion');
@@ -203,6 +263,10 @@ function flock(numBodies, initialSettings) {
         b1.vy(b1.vy() + dvy);
     }
 
+    /**
+     * Attract the given body towards its neighbors.
+     * @param {number} idx - the index of the body
+     */
     function _attract(idx) {
         var threshold = _getSetting('neighborThresholdDist');
         var attraction = _getSetting('attraction');
@@ -230,6 +294,10 @@ function flock(numBodies, initialSettings) {
         b1.vy(b1.vy() + (centroid.y - b1.y()) * attraction);
     }
 
+    /**
+     * Align the given body with its neighbors.
+     * @param {number} idx - the index of the body
+     */
     function _align(idx) {
         var threshold = _getSetting('neighborThresholdDist');
         var alignment = _getSetting('alignment');
@@ -257,6 +325,10 @@ function flock(numBodies, initialSettings) {
         b1.vy(b1.vy() + (avg.vy - b1.vy()) * alignment);
     }
 
+    /**
+     * Gear the given body towards a set fascination, if any.
+     * @param {number} idx - the index of the body
+     */
     function _seek(idx) {
         if (!_fascination) {
             return;
@@ -275,6 +347,10 @@ function flock(numBodies, initialSettings) {
         _fascination.strength += _fascination.decay;
     }
 
+    /**
+     * Gear the given body away from a set abomination, if any.
+     * @param {number} idx - the index of the body
+     */
     function _flee(idx) {
         if (!_abomination) {
             return;
@@ -293,21 +369,10 @@ function flock(numBodies, initialSettings) {
         _abomination.strength += _abomination.decay;
     }
 
-    function _enforceBounds(idx) {
-        var body = _bodies[idx];
-        if (body.x() < 0) {
-            body.vx(body.vx() + 0.005);
-        } else if (body.x() > 1) {
-            body.vx(body.vx() - 0.005);
-        } 
-
-        if (body.y() < 0) {
-            body.vy(body.vy() + 0.005);
-        } else if (body.y() > 1) {
-            body.vy(body.vy() - 0.005);
-        }
-    }
-
+    /**
+     * Make the given body converge towards a target speed.
+     * @param {number} idx - the index of the body
+     */
     function _targetSpeed(idx) {
         var b1 = _bodies[idx];
         var v = Math.sqrt(b1.vx()*b1.vx() + b1.vy()*b1.vy());
@@ -318,6 +383,11 @@ function flock(numBodies, initialSettings) {
         b1.vy(b1.vy() + b1.vy() / v * d * multiplier);
     }
 
+    /**
+     * Compute the distance between two bodies
+     * @param {body} b1
+     * @param {body} b2
+     */
     function _distance(b1, b2) {
         var dx = b1.x() - b2.x();
         var dy = b1.y() - b2.y();
@@ -338,6 +408,12 @@ function flock(numBodies, initialSettings) {
     };
 }
 
+/**
+ * Represents a single body in the flock.
+ * Keeps track of its own velocity and position.
+ * @param {number} x0 - the initial x pos [0, 1]
+ * @param {number} y0 - the initial y pos [0, 1]
+ */
 function body(x0, y0) {
     var _x = x0,
         _y = y0,
