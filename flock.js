@@ -376,6 +376,9 @@ function flock(numBodies, initialSettings) {
     function _targetSpeed(idx) {
         var b1 = _bodies[idx];
         var v = Math.sqrt(b1.vx()*b1.vx() + b1.vy()*b1.vy());
+        if (v === 0) {
+            return;
+        }
         var d = _getSetting('targetSpeed') - v;
 
         var multiplier = _getSetting('targetSpeedMultiplier');
@@ -432,12 +435,18 @@ function body(x0, y0) {
         if (val === undefined) {
             return _vx;
         }
+        if (isNaN(val)) {
+            throw 'vx is NaN';
+        }
         _vx = val;
     }
 
     function vy(val) {
         if (val === undefined) {
             return _vy;
+        }
+        if (isNaN(val)) {
+            throw 'vy is NaN';
         }
         _vy = val;
     }

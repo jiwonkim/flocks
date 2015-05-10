@@ -1,0 +1,221 @@
+<html>
+    <meta charset="UTF-8">
+    <head>
+        <title>flock.js</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+
+        <!-- Highlight JS -->
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/styles/tomorrow.min.css">
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+
+        <script src="jquery-1.11.2.min.js"></script>
+        <script src="flock.js"></script>
+        <script>
+        $(document).ready(function() {
+            var f = flock(10);
+            var bodies = f.bodies();
+            render('demo0');
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo1');
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo2');
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo3');
+
+            for (var i = 0; i < 100; i++) {
+                f.tick(0.1);
+            }
+            render('demo4');
+
+            f.scatter();
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo5');
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo6');
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo7');
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo8');
+
+            f.gather(5);
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo9');
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo10');
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo11');
+
+            for (var i = 0; i < 10; i++) {
+                f.tick(0.1);
+            }
+            render('demo12');
+
+            function render(canvasId) {
+                var canvas = document.getElementById(canvasId);
+                var context = canvas.getContext('2d');
+                for (var i = 0; i < bodies.length; i++) {
+                    var body = bodies[i];
+                    context.beginPath();
+                    context.arc(
+                        body.x() * canvas.width,
+                        body.y() * canvas.height,
+                        2,
+                        0,
+                        Math.PI * 2,
+                        false
+                    );
+                    context.closePath();
+                    context.fill();
+                }
+            }
+        });
+        </script>
+    </head>
+    <body>
+        <a href="http://github.com/jiwonkim/flocks"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+        <div id="container">
+            <h1>flock.js</h1>
+            <p class="help">A simple module to simulate flocking behavior</p>
+            <a href="#usage">usage</a> | <a href="#settings">settings</a> | <a href="#demos">demos</a>
+
+            <h2 id="usage">Usage</h2>
+            <p>
+            You can create a flock of 10 bodies like so:
+            </p>
+            <pre><code class="hljs javascript">var f = flock(10);</code></pre>
+            <p>Now you have a flock with 10 fish, birds, flies, or what have you, initialized with default <a href="#settings">settings</a>. The initial positions for the bodies are randomly selected.</p>
+            <p>Now let's render the flock. Since the flock-space spans 0 to 1 in both x and y dimensions (flock.js is 2d, for now), we need to translate this into canvas coordinates.
+            </p>
+            <canvas id="demo0" width="250px" height="250px"></canvas>
+            <p>And now, let's advance the flock ten ticks at a time with a dt of 0.1 for each tick and see how it moves!</p>
+            <pre><code class="hljs javascript">for(var i = 0; i < 10; i++) {
+    f.tick(0.1);
+}
+            </code></pre>
+            <canvas id="demo1" width="250px" height="250px"></canvas><br><br>
+            <canvas id="demo2" width="250px" height="250px"></canvas><br><br>
+            <canvas id="demo3" width="250px" height="250px"></canvas><br><br>
+            <p>Things are a bit slow, so let's fast-forward 100 ticks with the next one:</p>
+            <canvas id="demo4" width="250px" height="250px"></canvas><br>
+            <p>The flock is programmed to gather on initialization, so that's why you're seeing the flock move towards each other in the snapshots above. Let's try spitting them up!</p>
+            <pre><code class="hljs javascript">f.scatter()</code></pre>
+            <canvas id="demo5" width="250px" height="250px"></canvas><br><br>
+            <canvas id="demo6" width="250px" height="250px"></canvas><br><br>
+            <canvas id="demo7" width="250px" height="250px"></canvas><br><br>
+            <canvas id="demo8" width="250px" height="250px"></canvas><br>
+
+            <p>Now let's gather them again, and let's make them gather fast and tight by passing in a strength of x5.</p>
+            <pre><code class="hljs javascript">f.gather(5)</code></pre>
+            <canvas id="demo9" width="250px" height="250px"></canvas><br><br>
+            <canvas id="demo10" width="250px" height="250px"></canvas><br><br>
+            <canvas id="demo11" width="250px" height="250px"></canvas><br><br>
+            <canvas id="demo12" width="250px" height="250px"></canvas><br>
+            <p>
+                Take a look at some <a href="#demos">demos</a> for inspiration, and refer to the <a href="#settings">complete list of settings</a> to customize your flock.
+            </p>
+
+            <h2 id="settings">Settings</h2>
+            <p>When <code>flock</code> is invoked with no arguments, the default settings are used. But you can manually specify the settings to customize the behavior of the flock.</p>
+            <table id="settings-table">
+                <tr>
+                    <td><code>neighborThresholdDist</code></td>
+                    <td>
+                        <p>Default: <code>0.2</code></p>
+                        <p>The maximum distance between bodies that qualifies them as neighbors, and thus influencing each other's movements.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td><pre>repulsionThresholdDist</pre></td>
+                    <td>
+                        <p>Default: <code>0.05</code></p>
+                        <p>If two bodies are closer than this distance, they repulse each other.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td><pre>repulsion</pre></td>
+                    <td>
+                        <p>Default: <code>0.2</code></p>
+                        <p>Bigger the value, the stronger the repulsion when within the threshold distance.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td><pre>attraction</pre></td>
+                    <td>
+                        <p>Default: <code>0.01</code></p>
+                        <p>Bigger the value, the stronger the attraction among neighbors.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td><pre>alignment</pre></td>
+                    <td>
+                        <p>Default: <code>0.01</code></p>
+                        <p>Bigger the value, the stronger the tendency for each body to head towards the same direction as its neighbors.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td><pre>targetSpeed</pre></td>
+                    <td>
+                        <p>Default: <code>0.05</code></p>
+                        <p>If a body is traveling faster or slower than the target speed, it slows down or speeds up repectively to match the target speed.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td><pre>targetSpeedMultiplier</pre></td>
+                    <td>
+                        <p>Default: <code>0.15</code></p>
+                        <p>Bigger the value, the faster a body converges to the target speed.</p>
+                    </td>
+                </tr>
+            </table>
+            <p>For example, the following is used in the <a href="demos/birds.html">Birds of a Feather</a> demo to make the flock behave more like birds than a school of fish:<p>
+            <pre><code class="hljs javascript">var birds = flock(
+    NUM_BIRDS,
+    {
+        neighborThresholdDist: 0.1,
+        repulsionThresholdDist: 0.005,
+        repulsion: 0.01,
+        attraction: 0.05,
+        alignment: 0.001,
+        targetSpeed: 0.002,
+        targetSpeedMultiplier: 0.1
+    }
+);
+            </code></pre>
+            <h2 id="demos">Demos</h2>
+                <a href="demos/fish.html">Beyond the Porthole</a><br>
+                <a href="demos/birds.html">Birds of a Feather</a>
+            </h2>
+        </div>
+    </body>
+</html>
