@@ -93,7 +93,7 @@ var birds = flock(
 
 ## Demos
 
-    [Beyond the Porthole](http://jiwonk.im/flocks/demos/fish.html)
+[Beyond the Porthole](http://jiwonk.im/flocks/demos/fish.html)
 
-    [Birds of a Feather](http://jiwonk.im/flocks/demos/birds.html)
+[Birds of a Feather](http://jiwonk.im/flocks/demos/birds.html)
 
