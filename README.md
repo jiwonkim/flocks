@@ -74,7 +74,7 @@ When `flock` is invoked with no arguments, the default settings are used. But yo
 | `targetSpeed` | `0.05` | If a body is traveling faster or slower than the target speed, it slows down or speeds up repectively to match the target speed. |
 | `targetSpeedMultiplier` | `0.15` | Bigger the value, the faster a body converges to the target speed. |
 
-For example, the following is used in the [Birds of a Feather](demos/birds.html) demo to make the flock behave more like birds than a school of fish:
+For example, the following is used in the [Birds of a Feather](http://jiwonk.im/flocks/demos/birds.html) demo to make the flock behave more like birds than a school of fish:
 
 ```javascript
 var birds = flock(
@@ -93,7 +93,7 @@ var birds = flock(
 
 ## Demos
 
-    [Beyond the Porthole](demos/fish.html)
+    [Beyond the Porthole](http://jiwonk.im/flocks/demos/fish.html)
 
-    [Birds of a Feather](demos/birds.html)
+    [Birds of a Feather](http://jiwonk.im/flocks/demos/birds.html)
 
