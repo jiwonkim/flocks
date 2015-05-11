@@ -20,26 +20,6 @@
 
             var school = flock(200);
 
-            var toggle = true;
-            $(canvas).click(function(evt) {
-                if (toggle) {
-                    school.seek(
-                        evt.offsetX / canvas.width,
-                        evt.offsetY / canvas.height,
-                        5
-                    );
-                    school.gather(2, 500);
-                } else {
-                    school.flee(
-                        evt.offsetX / canvas.width,
-                        evt.offsetY / canvas.height,
-                        5
-                    );
-                    school.scatter(1.5);
-                }
-                toggle = !toggle;
-            });
-
             $(window).keypress(function(evt) {
                 if (evt.which === 32) { // the spacebar
                     school.scatter(2);
@@ -51,7 +31,6 @@
                 }
                 
             });
-        
             
             requestAnimationFrame(frame);
             function frame() {
@@ -91,6 +70,7 @@
             body {
                 text-align: center;
                 background: #000;
+                min-width: 800px;
             }
             
             #ocean-porthole-container {
@@ -99,20 +79,32 @@
                 left: 0;
                 width: 100vw;
                 height: 100vh;
+                min-width: 800px;
                 text-align: center;
             }
 
             #ocean-porthole {
                 height: 100%;
+                width: auto;
+                min-height: 600px;
             }
 
             canvas {
                 height: 100vh;
+                min-height: 600px;
                 background: -webkit-linear-gradient(90deg, #C9FFBF 10%, #FFAFBD 90%); /* Chrome 10+, Saf5.1+ */
                 background:    -moz-linear-gradient(90deg, #C9FFBF 10%, #FFAFBD 90%); /* FF3.6+ */
                 background:     -ms-linear-gradient(90deg, #C9FFBF 10%, #FFAFBD 90%); /* IE10 */
                 background:      -o-linear-gradient(90deg, #C9FFBF 10%, #FFAFBD 90%); /* Opera 11.10+ */
                 background:         linear-gradient(90deg, #C9FFBF 10%, #FFAFBD 90%); /* W3C */
+            }
+
+            #instructions {
+                position: absolute;
+                top: 0;
+                right: 0;
+                color: white;
+                font-family: 'Tahoma';
             }
         </style>
     </head>
@@ -121,6 +113,9 @@
         <canvas id="ocean-canvas" width="800" height="800"></canvas>
         <div id="ocean-porthole-container">
             <img id="ocean-porthole" src="assets/porthole-small.png">
+        </div>
+        <div id="instructions">
+            spacebar to scatter, G to gather
         </div>
     </body>
 </html>

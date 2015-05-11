@@ -104,11 +104,13 @@
         body {
             text-align: center;
             background-color: #000;
+            min-width: 800px;
         }
         #sky-canvas {
             height: 100vh;
             margin: 0;
             background-color: #fff;
+            min-height: 600px;
         }
         #window-container {
             position: absolute;
@@ -116,9 +118,19 @@
             left: 0;
             width: 100vw;
             height: 100vh;
+            min-width: 800px;
         }
         #window {
             height: 100%;
+            width: auto;
+            min-height: 600px;
+        }
+        #instructions {
+            position: absolute;
+            top: 0;
+            right: 0;
+            color: white;
+            font-family: 'Tahoma';
         }
         </style>
     </head>
@@ -127,6 +139,9 @@
         <canvas id="sky-canvas" width="800" height="800"></canvas>
         <div id="window-container">
             <img id="window" src="assets/window-small.png">
+        </div>
+        <div id="instructions">
+            spacebar to scatter, G to gather
         </div>
     </body>
 </html>
