@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var school = flock(10);
+    var school = flock(10, {dimension: 3});
     $(window).keypress(function(evt) {
         if (evt.which === 32) { // the spacebar
             school.scatter(2);

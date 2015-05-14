@@ -5,7 +5,8 @@ var DEFAULT_SETTINGS = {
     attraction: 0.01,
     alignment: 0.01,
     targetSpeed: 0.05,
-    targetSpeedMultiplier: 0.15
+    targetSpeedMultiplier: 0.15,
+    dimension: 2
 }
 
 /**
@@ -13,7 +14,7 @@ var DEFAULT_SETTINGS = {
  * @param {Object=} initialSettings
  */
 function flock(numBodies, initialSettings) {
-    var _settings = _initSettings(settings);
+    var _settings = _initSettings(initialSettings);
     var _tmpSettings = null;
     var _fascination = null;
     var _abomination = null;
@@ -21,7 +22,11 @@ function flock(numBodies, initialSettings) {
     // Create bodies at random initial positions and no velocity
     var _bodies = [];
     for (var i = 0; i < numBodies; i++) {
-        _bodies.push(body(Math.random(), Math.random()));
+        _bodies.push(body(
+            Math.random(),
+            _settings.dimension > 1 ? Math.random() : 0,
+            _settings.dimension > 2 ? Math.random() : 0
+        ));
     }
 
     // then give them a central push by calling gather on the flock
@@ -194,7 +199,8 @@ function flock(numBodies, initialSettings) {
             targetSpeedMultiplier: (
                 val.targetSpeedMultiplier ||
                 DEFAULT_SETTINGS.targetSpeedMultiplier
-            )
+            ),
+            dimension: (val.dimension || DEFAULT_SETTINGS.dimension)
         }
     }
 
@@ -243,8 +249,7 @@ function flock(numBodies, initialSettings) {
         var repulsion = _getSetting('repulsion');
 
         var b1 = _bodies[idx];
-        var dvx = 0;
-        var dvy = 0;
+        var dv = {x: 0, y: 0, z: 0};
         for (var j = 0; j < _bodies.length; j++) {
             if (j === idx) continue;
             
@@ -255,12 +260,14 @@ function flock(numBodies, initialSettings) {
             var d = dist / threshold;
             var mult = (1 - d*d); // max repulsion at zero dist
 
-            dvx += repulsion * mult * (b1.x() - b2.x());
-            dvy += repulsion * mult * (b1.y() - b2.y());
+            dv.x += repulsion * mult * (b1.x() - b2.x());
+            dv.y += repulsion * mult * (b1.y() - b2.y());
+            dv.z += repulsion * mult * (b1.z() - b2.z());
         }
 
-        b1.vx(b1.vx() + dvx);
-        b1.vy(b1.vy() + dvy);
+        b1.vx(b1.vx() + dv.x);
+        b1.vy(b1.vy() + dv.y);
+        b1.vz(b1.vz() + dv.z);
     }
 
     /**
@@ -272,7 +279,7 @@ function flock(numBodies, initialSettings) {
         var attraction = _getSetting('attraction');
 
         var b1 = _bodies[idx];
-        var sum = {x: 0, y: 0};
+        var sum = {x: 0, y: 0, z: 0};
         var neighborCount = 0;
         for (var j = 0; j < _bodies.length; j++) {
             if (j === idx) continue;
@@ -283,15 +290,18 @@ function flock(numBodies, initialSettings) {
             neighborCount++;
             sum.x += b2.x(); 
             sum.y += b2.y();
+            sum.z += b2.z();
         }
         if (neighborCount === 0) return;
 
         var centroid = {
             x: sum.x / neighborCount,
-            y: sum.y / neighborCount
+            y: sum.y / neighborCount,
+            z: sum.z / neighborCount
         }
         b1.vx(b1.vx() + (centroid.x - b1.x()) * attraction);
         b1.vy(b1.vy() + (centroid.y - b1.y()) * attraction);
+        b1.vz(b1.vz() + (centroid.z - b1.z()) * attraction);
     }
 
     /**
@@ -303,7 +313,7 @@ function flock(numBodies, initialSettings) {
         var alignment = _getSetting('alignment');
 
         var b1 = _bodies[idx];
-        var sum = {vx: 0, vy: 0};
+        var sum = {vx: 0, vy: 0, vz: 0};
         var neighborCount = 0;
         for (var j = 0; j < _bodies.length; j++) {
             if (j === idx) continue;
@@ -314,15 +324,18 @@ function flock(numBodies, initialSettings) {
             neighborCount++;
             sum.vx += b2.vx(); 
             sum.vy += b2.vy();
+            sum.vz += b2.vz();
         }
         if (neighborCount === 0) return;
 
         var avg = {
             vx: sum.vx / neighborCount,
-            vy: sum.vy / neighborCount
+            vy: sum.vy / neighborCount,
+            vz: sum.vz / neighborCount
         }
         b1.vx(b1.vx() + (avg.vx - b1.vx()) * alignment);
         b1.vy(b1.vy() + (avg.vy - b1.vy()) * alignment);
+        b1.vz(b1.vz() + (avg.vz - b1.vz()) * alignment);
     }
 
     /**
@@ -341,8 +354,10 @@ function flock(numBodies, initialSettings) {
         var body = _bodies[idx];
         var dvx = (_fascination.x - body.x()) * 0.01 * _fascination.strength;
         var dvy = (_fascination.y - body.y()) * 0.01 * _fascination.strength;
+        var dvz = (_fascination.z - body.z()) * 0.01 * _fascination.strength;
         body.vx(body.vx() + dvx);
         body.vy(body.vy() + dvy);
+        body.vz(body.vz() + dvz);
 
         _fascination.strength += _fascination.decay;
     }
@@ -363,8 +378,10 @@ function flock(numBodies, initialSettings) {
         var body = _bodies[idx];
         var dvx = (body.x() - _abomination.x) * 0.01 * _abomination.strength;
         var dvy = (body.y() - _abomination.y) * 0.01 * _abomination.strength;
+        var dvz = (body.z() - _abomination.z) * 0.01 * _abomination.strength;
         body.vx(body.vx() + dvx);
         body.vy(body.vy() + dvy);
+        body.vz(body.vz() + dvz);
 
         _abomination.strength += _abomination.decay;
     }
@@ -375,7 +392,7 @@ function flock(numBodies, initialSettings) {
      */
     function _targetSpeed(idx) {
         var b1 = _bodies[idx];
-        var v = Math.sqrt(b1.vx()*b1.vx() + b1.vy()*b1.vy());
+        var v = Math.sqrt(b1.vx()*b1.vx() + b1.vy()*b1.vy() + b1.vz()*b1.vz());
         if (v === 0) {
             return;
         }
@@ -384,6 +401,7 @@ function flock(numBodies, initialSettings) {
         var multiplier = _getSetting('targetSpeedMultiplier');
         b1.vx(b1.vx() + b1.vx() / v * d * multiplier);
         b1.vy(b1.vy() + b1.vy() / v * d * multiplier);
+        b1.vz(b1.vz() + b1.vz() / v * d * multiplier);
     }
 
     /**
@@ -394,7 +412,8 @@ function flock(numBodies, initialSettings) {
     function _distance(b1, b2) {
         var dx = b1.x() - b2.x();
         var dy = b1.y() - b2.y();
-        return Math.sqrt(dx*dx + dy*dy);
+        var dz = b1.z() - b2.z();
+        return Math.sqrt(dx*dx + dy*dy + dz*dz);
     }
     
     return {
@@ -417,11 +436,13 @@ function flock(numBodies, initialSettings) {
  * @param {number} x0 - the initial x pos [0, 1]
  * @param {number} y0 - the initial y pos [0, 1]
  */
-function body(x0, y0) {
+function body(x0, y0, z0) {
     var _x = x0,
         _y = y0,
+        _z = z0,
         _vx = 0,
-        _vy = 0;
+        _vy = 0,
+        _vz = 0;
 
     function x() {
         return _x;
@@ -429,6 +450,10 @@ function body(x0, y0) {
 
     function y() {
         return _y;
+    }
+
+    function z() {
+        return _z;
     }
 
     function vx(val) {
@@ -451,16 +476,29 @@ function body(x0, y0) {
         _vy = val;
     }
 
+    function vz(val) {
+        if (val === undefined) {
+            return _vz;
+        }
+        if (isNaN(val)) {
+            throw 'vy is NaN';
+        }
+        _vz = val;
+    }
+
     function tick(dt) {
         _x = (1 + _x + _vx * dt) % 1;
         _y = (1 + _y + _vy * dt) % 1;
+        _z = (1 + _z + _vz * dt) % 1;
     }
 
     return {
         x: x,
         y: y,
+        z: z,
         vx: vx,
         vy: vy,
+        vz: vz,
         tick: tick
     }
 }
