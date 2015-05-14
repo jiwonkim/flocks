@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var school = flock(10, {dimension: 3});
+    var school = flock(200, {dimension: 3});
     $(window).keypress(function(evt) {
         if (evt.which === 32) { // the spacebar
             school.scatter(2);
@@ -99,7 +99,12 @@ $(document).ready(function() {
         for (var i = 0; i < bodies.length; i++) {
             pushMatrix();
 
-            mat4.translate(mvmatrix, [bodies[i].x() - 0.5, bodies[i].y() - 0.5, -1.0 - bodies[i].z()]);
+            var pos = {
+                x: bodies[i].x() - 0.5,
+                y: bodies[i].y() - 0.5,
+                z: -1.0 - bodies[i].z()
+            }
+            mat4.translate(mvmatrix, [pos.x, pos.y, pos.z]);
             mat4.rotate(mvmatrix, Math.atan2(-bodies[i].vy(), bodies[i].vx()), [0, 0, -1]);
             mat4.scale(mvmatrix, [0.01, 0.01, 0.01]);
 
@@ -110,7 +115,11 @@ $(document).ready(function() {
             // pass in matrices to shaders
             gl.uniformMatrix4fv(shaderProgram.pmatrix, false, pmatrix);
             gl.uniformMatrix4fv(shaderProgram.mvmatrix, false, mvmatrix);
-            gl.uniform4fv(shaderProgram.color, [1., 1., 1., 1.]);
+
+            var znear = -1;
+            var zfar = -2;
+            var alpha = -(pos.z - zfar) / (zfar - znear);
+            gl.uniform4fv(shaderProgram.color, [alpha, alpha, alpha, 1.]);
 
             // render
             gl.drawArrays(gl.TRIANGLES, 0, vertexbuffer.numItems);
