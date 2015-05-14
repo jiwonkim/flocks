@@ -11,7 +11,6 @@ $(document).ready(function() {
         }
         
     });
-            
 
     var canvas = document.getElementById('3d-canvas');
     var gl;
@@ -100,7 +99,7 @@ $(document).ready(function() {
         for (var i = 0; i < bodies.length; i++) {
             pushMatrix();
 
-            mat4.translate(mvmatrix, [bodies[i].x() - 0.5, bodies[i].y() - 0.5, -1.0]);
+            mat4.translate(mvmatrix, [bodies[i].x() - 0.5, bodies[i].y() - 0.5, -1.0 - bodies[i].z()]);
             mat4.rotate(mvmatrix, Math.atan2(-bodies[i].vy(), bodies[i].vx()), [0, 0, -1]);
             mat4.scale(mvmatrix, [0.01, 0.01, 0.01]);
 

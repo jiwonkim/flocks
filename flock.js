@@ -489,7 +489,8 @@ function body(x0, y0, z0) {
     function tick(dt) {
         _x = (1 + _x + _vx * dt) % 1;
         _y = (1 + _y + _vy * dt) % 1;
-        _z = (1 + _z + _vz * dt) % 1;
+        _z += _vz * dt;
+        //_z = (1 + _z + _vz * dt) % 1;
     }
 
     return {
