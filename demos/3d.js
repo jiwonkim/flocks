@@ -1,6 +1,9 @@
 $(document).ready(function() {
     var SCALE = 0.01;
-    var school = flock(200, {dimension: 3});
+    var school = flock(
+        200,
+        {dimensions: 3, overflow: OVERFLOW_SETTINGS.BIND}
+    );
     $(window).keypress(function(evt) {
         if (evt.which === 32) { // the spacebar
             school.scatter(2);
@@ -142,6 +145,9 @@ $(document).ready(function() {
 
         // then make the body points in the right direction in the x = 0 plane
         mat4.rotate(mvmatrix, Math.atan2(-body.vy(), body.vz()), [-1, 0, 0]);
+
+        // then make the body points in the right direction in the y = 0 plane
+        //mat4.rotate(mvmatrix, Math.atan2(-body.vz(), body.vx()), [0, -1, 0]);
     }
 
     function pushMatrix() {

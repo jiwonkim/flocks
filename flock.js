@@ -1,3 +1,8 @@
+var OVERFLOW_SETTINGS = {
+    BIND: 'bind',
+    WRAP: 'wrap',
+    BOUNCE: 'bounce'
+}
 var DEFAULT_SETTINGS = {
     neighborThresholdDist: 0.2,
     repulsionThresholdDist: 0.05,
@@ -6,7 +11,8 @@ var DEFAULT_SETTINGS = {
     alignment: 0.01,
     targetSpeed: 0.05,
     targetSpeedMultiplier: 0.15,
-    dimension: 2
+    dimensions: 2,
+    overflow: OVERFLOW_SETTINGS.BIND
 }
 
 /**
@@ -24,8 +30,8 @@ function flock(numBodies, initialSettings) {
     for (var i = 0; i < numBodies; i++) {
         _bodies.push(body(
             Math.random(),
-            _settings.dimension > 1 ? Math.random() : 0,
-            _settings.dimension > 2 ? Math.random() : 0
+            _settings.dimensions > 1 ? Math.random() : 0,
+            _settings.dimensions > 2 ? Math.random() : 0
         ));
     }
 
@@ -132,6 +138,8 @@ function flock(numBodies, initialSettings) {
      */
     function tick(dt) {
         for (var i = 0; i < _bodies.length; i++) {
+            _handleOverflow(i);
+
             _repulse(i);
             _attract(i);
             _align(i);
@@ -200,7 +208,8 @@ function flock(numBodies, initialSettings) {
                 val.targetSpeedMultiplier ||
                 DEFAULT_SETTINGS.targetSpeedMultiplier
             ),
-            dimension: (val.dimension || DEFAULT_SETTINGS.dimension)
+            dimensions: (val.dimensions || DEFAULT_SETTINGS.dimensions),
+            overflow: (val.overflow || DEFAULT_SETTINGS.overflow),
         }
     }
 
@@ -238,6 +247,47 @@ function flock(numBodies, initialSettings) {
             return _settings[key];
         }
         return _tmpSettings[key].val;
+    }
+
+    /**
+     *
+     */
+    function _handleOverflow(idx) {
+        var b = _bodies[idx];
+        if (_inBounds(b)) {
+            return;
+        }
+
+        var overflow = _getSetting('overflow');
+        if (overflow === OVERFLOW_SETTINGS.WRAP) {
+            b.x(1 + b.x() % 1);
+            b.y(1 + b.y() % 1);
+            b.z(1 + b.z() % 1);
+        } else if (overflow === OVERFLOW_SETTINGS.BIND) {
+            var diff = [0.5 - b.x(), 0.5 - b.y(), 0.5 - b.z()];
+            b.vx(b.vx() + diff[0] * 0.001);
+            b.vy(b.vy() + diff[1] * 0.001);
+            b.vz(b.vz() + diff[2] * 0.001);
+            
+        } else if (overflow === OVERFLOW_SETTINGS.BOUNCE) {
+            if (b.x() > 1 && b.vx() > 0) {
+                b.vx(-b.vx());
+            }
+            if (b.y() > 1 && b.vy() > 0) {
+                b.vy(-b.vy());
+            }
+            if (b.z() > 1 && b.vz() > 0) {
+                b.vz(-b.vz());
+            }
+        }
+    }
+
+    function _inBounds(body) {
+        return (
+            body.x() >= 0 && body.x() <= 1 &&
+            body.y() >= 0 && body.y() <= 1 &&
+            body.z() >= 0 && body.z() <= 1
+        );
     }
 
     /**
@@ -487,10 +537,9 @@ function body(x0, y0, z0) {
     }
 
     function tick(dt) {
-        _x = (1 + _x + _vx * dt) % 1;
-        _y = (1 + _y + _vy * dt) % 1;
+        _x += _vx * dt;
+        _y += _vy * dt;
         _z += _vz * dt;
-        //_z = (1 + _z + _vz * dt) % 1;
     }
 
     return {
