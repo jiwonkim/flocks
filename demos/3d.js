@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    var SCALE = 0.01;
     var school = flock(200, {dimension: 3});
     $(window).keypress(function(evt) {
         if (evt.which === 32) { // the spacebar
@@ -99,14 +100,10 @@ $(document).ready(function() {
         for (var i = 0; i < bodies.length; i++) {
             pushMatrix();
 
-            var pos = {
-                x: bodies[i].x() - 0.5,
-                y: bodies[i].y() - 0.5,
-                z: -1.0 - bodies[i].z()
-            }
-            mat4.translate(mvmatrix, [pos.x, pos.y, pos.z]);
-            mat4.rotate(mvmatrix, Math.atan2(-bodies[i].vy(), bodies[i].vx()), [0, 0, -1]);
-            mat4.scale(mvmatrix, [0.01, 0.01, 0.01]);
+            var body = bodies[i];
+            var pos = translate(body);
+            rotate(body);
+            mat4.scale(mvmatrix, [SCALE, SCALE, SCALE]);
 
             // pass in vertices to shaders
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
@@ -126,6 +123,25 @@ $(document).ready(function() {
 
             popMatrix();
         }
+    }
+
+    function translate(body) {
+        var pos = {
+            x: body.x() - 0.5,
+            y: body.y() - 0.5,
+            z: -1.0 - body.z()
+        }
+        mat4.translate(mvmatrix, [pos.x, pos.y, pos.z]);
+        return pos;
+    }
+
+    // make the body point in the direction it's going
+    function rotate(body) {
+        // make the body point in the right direction in the z = 0 plane
+        mat4.rotate(mvmatrix, Math.atan2(-body.vy(), body.vx()), [0, 0, -1]);
+
+        // then make the body points in the right direction in the x = 0 plane
+        mat4.rotate(mvmatrix, Math.atan2(-body.vy(), body.vz()), [-1, 0, 0]);
     }
 
     function pushMatrix() {
