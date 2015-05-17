@@ -2,11 +2,17 @@ $(document).ready(function() {
     var SCALE = 0.01;
     var school = flock(
         200,
-        {dimensions: 3, overflow: OVERFLOW_SETTINGS.BIND}
+        {
+            neighborThresholdDist: 0.15,
+            repulsionThresholdDist: 0.01,
+            attraction: 0.001,
+            dimensions: 3,
+            overflow: OVERFLOW_SETTINGS.BIND
+        }
     );
     $(window).keypress(function(evt) {
         if (evt.which === 32) { // the spacebar
-            school.scatter(2);
+            school.scatter(3);
             return;
         }
         if (evt.which === 103) { // the 'g' key
@@ -43,7 +49,7 @@ $(document).ready(function() {
             gl = canvas.getContext("webgl");
             gl.viewportWidth = canvas.width;
             gl.viewportHeight = canvas.height;
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clearColor(0, 0, 0, 0);
             gl.enable(gl.DEPTH_TEST);
         } catch (e) {
         }
@@ -82,9 +88,9 @@ $(document).ready(function() {
         vertexbuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
         var vertices = [
-            -1.0,  1.0,  0.0,
-             2.0,  0.0,  0.0,
-            -1.0, -1.0,  0.0
+            0, 0, 2,
+            0, 1, -1,
+            0, -1, -1
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         vertexbuffer.itemSize = 3;
@@ -106,7 +112,10 @@ $(document).ready(function() {
             var body = bodies[i];
             var pos = translate(body);
             rotate(body);
-            mat4.scale(mvmatrix, mvmatrix, [SCALE, SCALE, SCALE]);
+            
+            var scale = SCALE;
+            if (i % 5 === 0) scale *= 0.8;
+            mat4.scale(mvmatrix, mvmatrix, [scale, scale, scale]);
 
             // pass in vertices to shaders
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
@@ -119,7 +128,9 @@ $(document).ready(function() {
             var znear = -1;
             var zfar = -2;
             var alpha = -(pos.z - zfar) / (zfar - znear);
-            gl.uniform4fv(shaderProgram.color, [alpha, alpha, alpha, 1.]);
+            if (alpha > 1) alpha = 1.;
+            else if (alpha < 0) alpha = 0.;
+            gl.uniform4fv(shaderProgram.color, [0, 0, 0, alpha]);
 
             // render
             gl.drawArrays(gl.TRIANGLES, 0, vertexbuffer.numItems);
@@ -140,14 +151,29 @@ $(document).ready(function() {
 
     // make the body point in the direction it's going
     function rotate(body) {
-        // make the body point in the right direction in the z = 0 plane
-        mat4.rotate(mvmatrix, mvmatrix, Math.atan2(-body.vy(), body.vx()), [0, 0, -1]);
+        var direction = vec3.fromValues(body.vx(), body.vy(), body.vz());
+        vec3.normalize(direction, direction);
 
-        // then make the body points in the right direction in the x = 0 plane
-        mat4.rotate(mvmatrix, mvmatrix, Math.atan2(-body.vy(), body.vz()), [-1, 0, 0]);
+        var up = getUpVector(direction);
 
-        // then make the body points in the right direction in the y = 0 plane
-        //mat4.rotate(mvmatrix, Math.atan2(-body.vz(), body.vx()), [0, -1, 0]);
+        var lookat = mat4.create();    
+        mat4.lookAt(lookat, vec3.create(), direction, up);
+
+        mat4.multiply(mvmatrix, mvmatrix, lookat);
+    }
+
+    function getUpVector(direction) {
+        var worldUp = vec3.fromValues(0, 1, 0);
+
+        var right = vec3.create();
+        vec3.cross(right, direction, worldUp);
+        vec3.normalize(right, right);
+
+        var up = vec3.create();
+        vec3.cross(up, right, direction);
+        vec3.normalize(up, up);
+
+        return up;
     }
 
     function pushMatrix() {
