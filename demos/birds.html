@@ -35,13 +35,16 @@
             var birds = flock(
                 NUM_BIRDS,
                 {
+/*
                     neighborThresholdDist: 0.1,
                     repulsionThresholdDist: 0.005,
                     repulsion: 0.01,
                     attraction: 0.05,
                     alignment: 0.001,
-                    targetSpeed: 0.002,
-                    targetSpeedMultiplier: 0.1
+                    targetSpeed: 0.001,
+                    targetSpeedMultiplier: 0.1,
+*/
+                    overflow: OVERFLOW_SETTINGS.WRAP
                 }
             );
 

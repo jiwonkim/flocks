@@ -260,9 +260,9 @@ function flock(numBodies, initialSettings) {
 
         var overflow = _getSetting('overflow');
         if (overflow === OVERFLOW_SETTINGS.WRAP) {
-            b.x(1 + b.x() % 1);
-            b.y(1 + b.y() % 1);
-            b.z(1 + b.z() % 1);
+            b.x((1 + b.x()) % 1);
+            b.y((1 + b.y()) % 1);
+            b.z((1 + b.z()) % 1);
         } else if (overflow === OVERFLOW_SETTINGS.BIND) {
             var diff = [0.5 - b.x(), 0.5 - b.y(), 0.5 - b.z()];
             b.vx(b.vx() + diff[0] * 0.001);
@@ -494,16 +494,25 @@ function body(x0, y0, z0) {
         _vy = 0,
         _vz = 0;
 
-    function x() {
-        return _x;
+    function x(val) {
+        if (val === undefined) {
+            return _x;
+        }
+        _x = val;
     }
 
-    function y() {
-        return _y;
+    function y(val) {
+        if (val === undefined) {
+            return _y;
+        }
+        _y = val;
     }
 
-    function z() {
-        return _z;
+    function z(val) {
+        if (val === undefined) {
+            return _z;
+        }
+        _z = val;
     }
 
     function vx(val) {
