@@ -97,7 +97,7 @@ $(document).ready(function() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pmatrix);
+        mat4.perspective(pmatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
         mat4.identity(mvmatrix);
 
         for (var i = 0; i < bodies.length; i++) {
@@ -106,7 +106,7 @@ $(document).ready(function() {
             var body = bodies[i];
             var pos = translate(body);
             rotate(body);
-            mat4.scale(mvmatrix, [SCALE, SCALE, SCALE]);
+            mat4.scale(mvmatrix, mvmatrix, [SCALE, SCALE, SCALE]);
 
             // pass in vertices to shaders
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
@@ -134,26 +134,24 @@ $(document).ready(function() {
             y: body.y() - 0.5,
             z: -1.0 - body.z()
         }
-        mat4.translate(mvmatrix, [pos.x, pos.y, pos.z]);
+        mat4.translate(mvmatrix, mvmatrix, [pos.x, pos.y, pos.z]);
         return pos;
     }
 
     // make the body point in the direction it's going
     function rotate(body) {
         // make the body point in the right direction in the z = 0 plane
-        mat4.rotate(mvmatrix, Math.atan2(-body.vy(), body.vx()), [0, 0, -1]);
+        mat4.rotate(mvmatrix, mvmatrix, Math.atan2(-body.vy(), body.vx()), [0, 0, -1]);
 
         // then make the body points in the right direction in the x = 0 plane
-        mat4.rotate(mvmatrix, Math.atan2(-body.vy(), body.vz()), [-1, 0, 0]);
+        mat4.rotate(mvmatrix, mvmatrix, Math.atan2(-body.vy(), body.vz()), [-1, 0, 0]);
 
         // then make the body points in the right direction in the y = 0 plane
         //mat4.rotate(mvmatrix, Math.atan2(-body.vz(), body.vx()), [0, -1, 0]);
     }
 
     function pushMatrix() {
-        var copy = mat4.create();
-        mat4.set(mvmatrix, copy);
-        mvstack.push(copy);
+        mvstack.push(mat4.clone(mvmatrix));
     }
 
     function popMatrix() {
