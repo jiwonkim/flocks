@@ -16,29 +16,71 @@
 
             uniform mat4 mvmatrix;
             uniform mat4 pmatrix;
-            uniform vec4 color_in;
 
             varying vec4 color_out;
 
             void main(void) {
                 gl_Position = pmatrix * mvmatrix * vec4(vertex, 1.0);
-                color_out = color_in;
+
+                vec4 worldPos = mvmatrix * vec4(vertex, 1.0);
+                color_out = vec4(0., 0., 0., clamp(worldPos.z + 2., 0., 1.));
             }
         </script>
         <script src="3d.js"></script>
+        <script>
+            $(document).ready(function() {
+                var overlay = document.getElementById('overlay-canvas');
+                var context = overlay.getContext('2d');
+                context.fillStyle = '#fff';
+                context.fillRect(0, 0, overlay.width, overlay.height);
+
+                context.globalCompositeOperation = 'destination-out';
+                context.beginPath();
+                context.arc(
+                    overlay.width / 2,
+                    overlay.height / 2,
+                    overlay.width / 2 - 10,
+                    0,
+                    2 * Math.PI,
+                    false
+                );
+                context.fill();
+            });
+        </script>
         <style>
             body {
+                margin: 0;
+                overflow: hidden;
                 text-align: center;
+
+            }
+            #flock-canvas {
+                width: auto;
+                height: 100vh;
                 background: -webkit-linear-gradient(0deg, #B993D6 10%, #8CA6DB 90%); /* Chrome 10+, Saf5.1+ */
                 background:    -moz-linear-gradient(0deg, #B993D6 10%, #8CA6DB 90%); /* FF3.6+ */
                 background:     -ms-linear-gradient(0deg, #B993D6 10%, #8CA6DB 90%); /* IE10 */
                 background:      -o-linear-gradient(0deg, #B993D6 10%, #8CA6DB 90%); /* Opera 11.10+ */
                 background:         linear-gradient(0deg, #B993D6 10%, #8CA6DB 90%); /* W3C */
-
+            }
+            #overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                text-align: center;
+            }
+            #overlay-canvas {
+                width: auto;
+                height: 100vh;
             }
         </style>
     </head>
     <body>
-        <canvas id="3d-canvas" width="800" height="800"></canvas>
+        <canvas id="flock-canvas" width="800" height="800"></canvas>
+        <div id="overlay">
+            <canvas id="overlay-canvas" width="800" height="800"></canvas>
+        </div>
     </body>
 </html>

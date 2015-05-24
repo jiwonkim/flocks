@@ -1,6 +1,9 @@
 $(document).ready(function() {
+    /* Constants */
     var SCALE = 0.01;
     var NUM_BODIES = 200;
+
+    /* Variables */
     var school = flock(
         NUM_BODIES,
         {
@@ -11,10 +14,22 @@ $(document).ready(function() {
             overflow: OVERFLOW_SETTINGS.BIND
         }
     );
+
+    var canvas, gl;
+    canvas = document.getElementById('flock-canvas');
+    gl = canvas.getContext("webgl");
+
+    var mvmatrix, pmatrix;
+    mvmatrix = mat4.create();
+    pmatrix = mat4.create();
+
+    var vertexbuffer, shaderProgram;
+
+    /* Register Event Handlers */
     $(window).keypress(function(evt) {
         if (evt.which === 32) { // the spacebar
             school.scatter(3);
-            return;
+            return false; // disable scroll
         }
         if (evt.which === 103) { // the 'g' key
             school.gather();
@@ -23,20 +38,12 @@ $(document).ready(function() {
         
     });
 
-    var canvas = document.getElementById('3d-canvas');
-    var gl;
-
-    var mvmatrix = mat4.create();
-    var mvstack = [];
-
-    var pmatrix = mat4.create();
-
-    var vertexbuffer;
-    var shaderProgram;
-
-    initGL(canvas);
+    /* Init GL-related stuff */
+    initGL();
     initShaders();
-    initBuffers();
+    initBuffer();
+
+    /* Start animating */
     requestAnimationFrame(frame);
 
     function frame() {
@@ -45,18 +52,11 @@ $(document).ready(function() {
         requestAnimationFrame(frame);
     }
 
-    function initGL(canvas) {
-        try {
-            gl = canvas.getContext("webgl");
-            gl.viewportWidth = canvas.width;
-            gl.viewportHeight = canvas.height;
-            gl.clearColor(0, 0, 0, 0);
-            gl.enable(gl.DEPTH_TEST);
-        } catch (e) {
-        }
-        if (!gl) {
-            alert("Could not initialise WebGL, sorry :-(");
-        }
+    function initGL() {
+        gl.viewportWidth = canvas.width;
+        gl.viewportHeight = canvas.height;
+        gl.clearColor(0, 0, 0, 0);
+        gl.enable(gl.DEPTH_TEST);
     }
 
     function initShaders() {
@@ -82,10 +82,9 @@ $(document).ready(function() {
 
         shaderProgram.pmatrix = gl.getUniformLocation(shaderProgram, "pmatrix");
         shaderProgram.mvmatrix = gl.getUniformLocation(shaderProgram, "mvmatrix");
-        shaderProgram.color = gl.getUniformLocation(shaderProgram, "color_in");
     }
 
-    function initBuffers() {
+    function initBuffer() {
         vertexbuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
         vertexbuffer.itemSize = 3;
@@ -113,7 +112,6 @@ $(document).ready(function() {
         gl.vertexAttribPointer(shaderProgram.vertex, vertexbuffer.itemSize, gl.FLOAT, false, 0, 0);
 
         bodies.forEach(function(body, i) {
-            gl.uniform4fv(shaderProgram.color, [0, 0, 0, getAlpha(body)]);
             gl.drawArrays(gl.TRIANGLES, i * 3, 3);
         });
     }
@@ -133,16 +131,6 @@ $(document).ready(function() {
             });
         });
         return new Float32Array(vertices)
-    }
-
-    function getAlpha(body) {
-        var z = -1.0 - body.z();
-        var znear = -1;
-        var zfar = -2;
-        var alpha = -(z - zfar) / (zfar - znear);
-        if (alpha > 1) return 1.;
-        else if (alpha < 0) return 0.;
-        return alpha;
     }
 
     function getPosition(body) {
