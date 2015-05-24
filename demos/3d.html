@@ -45,6 +45,20 @@
                     false
                 );
                 context.fill();
+
+                var help = $('#help');
+                var helpVisible = true;
+                $('#help-toggle').click(function() {
+                    if (helpVisible) {
+                        $(this).text('?').css('top', '10px');
+                        help.css('left', -(help.width() + 10));
+                        helpVisible = false;
+                    } else {
+                        $(this).html('&times;').css('top', '0');
+                        help.css('left', 0);
+                        helpVisible = true;
+                    }
+                });
             });
         </script>
         <style>
@@ -75,12 +89,47 @@
                 width: auto;
                 height: 100vh;
             }
+            #help {
+                position: absolute;
+                left: 0;
+                top: 20px;
+                padding: 5px 50px 5px 3px;
+                background-color: #333;
+                color: #fff;
+                border-right: 10px solid #aaa;
+                font-family: "Helvetica Neue", Helvetica, sans-serif;
+                text-align: left;
+            }
+            #help h1 {
+                margin: 0;
+                font-weight: 200;
+            }
+            #help h2 {
+                font-weight: 100;
+                color: #aaa;
+                margin: 0;
+            }
+            #help-toggle {
+                position: absolute;
+                top: 0px;
+                right: 10px;
+                color: #fff;
+                font-size: 32px;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
         <canvas id="flock-canvas" width="800" height="800"></canvas>
         <div id="overlay">
             <canvas id="overlay-canvas" width="800" height="800"></canvas>
+        </div>
+        <div id="help">
+            <h1>flock.js in 3d</h1>
+            <h2><b>spacebar</b> to scatter</h2>
+            <h2><b>'g'</b> to gather</h2>
+
+            <div id="help-toggle">&times;</div>
         </div>
     </body>
 </html>
