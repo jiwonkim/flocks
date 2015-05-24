@@ -1,7 +1,8 @@
 $(document).ready(function() {
     var SCALE = 0.01;
+    var NUM_BODIES = 200;
     var school = flock(
-        200,
+        NUM_BODIES,
         {
             neighborThresholdDist: 0.15,
             repulsionThresholdDist: 0.01,
@@ -87,14 +88,8 @@ $(document).ready(function() {
     function initBuffers() {
         vertexbuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
-        var vertices = [
-            0, 0, 2,
-            0, 1, -1,
-            0, -1, -1
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         vertexbuffer.itemSize = 3;
-        vertexbuffer.numItems = 3;
+        vertexbuffer.numItems = NUM_BODIES * 3;
     }
 
     function draw() {
@@ -106,85 +101,99 @@ $(document).ready(function() {
         mat4.perspective(pmatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
         mat4.identity(mvmatrix);
 
-        for (var i = 0; i < bodies.length; i++) {
-            pushMatrix();
+        // pass in matrices to shaders
+        gl.uniformMatrix4fv(shaderProgram.pmatrix, false, pmatrix);
+        gl.uniformMatrix4fv(shaderProgram.mvmatrix, false, mvmatrix);
 
-            var body = bodies[i];
-            var pos = translate(body);
-            rotate(body);
+        // compute vertices and bind as buffer data
+        gl.bufferData(gl.ARRAY_BUFFER, getBufferData(bodies), gl.STATIC_DRAW);
+
+        // pass in vertices to shaders
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+        gl.vertexAttribPointer(shaderProgram.vertex, vertexbuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        bodies.forEach(function(body, i) {
+            gl.uniform4fv(shaderProgram.color, [0, 0, 0, getAlpha(body)]);
+            gl.drawArrays(gl.TRIANGLES, i * 3, 3);
+        });
+    }
+
+    function getBufferData(bodies) {
+        var vertices = [];
+        var positions = [];
+        bodies.forEach(function(body) {
+            var pos = getPosition(body);
+            positions.push(pos);
             
-            var scale = SCALE;
-            if (i % 5 === 0) scale *= 0.8;
-            mat4.scale(mvmatrix, mvmatrix, [scale, scale, scale]);
-
-            // pass in vertices to shaders
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
-            gl.vertexAttribPointer(shaderProgram.vertex, vertexbuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-            // pass in matrices to shaders
-            gl.uniformMatrix4fv(shaderProgram.pmatrix, false, pmatrix);
-            gl.uniformMatrix4fv(shaderProgram.mvmatrix, false, mvmatrix);
-
-            var znear = -1;
-            var zfar = -2;
-            var alpha = -(pos.z - zfar) / (zfar - znear);
-            if (alpha > 1) alpha = 1.;
-            else if (alpha < 0) alpha = 0.;
-            gl.uniform4fv(shaderProgram.color, [0, 0, 0, alpha]);
-
-            // render
-            gl.drawArrays(gl.TRIANGLES, 0, vertexbuffer.numItems);
-
-            popMatrix();
-        }
+            var triangleVertices = getVertices(body, pos);
+            triangleVertices.forEach(function(vertex) {
+                vertices.push(vertex[0]);
+                vertices.push(vertex[1]);
+                vertices.push(vertex[2]);
+            });
+        });
+        return new Float32Array(vertices)
     }
 
-    function translate(body) {
-        var pos = {
-            x: body.x() - 0.5,
-            y: body.y() - 0.5,
-            z: -1.0 - body.z()
-        }
-        mat4.translate(mvmatrix, mvmatrix, [pos.x, pos.y, pos.z]);
-        return pos;
+    function getAlpha(body) {
+        var z = -1.0 - body.z();
+        var znear = -1;
+        var zfar = -2;
+        var alpha = -(z - zfar) / (zfar - znear);
+        if (alpha > 1) return 1.;
+        else if (alpha < 0) return 0.;
+        return alpha;
     }
 
-    // make the body point in the direction it's going
-    function rotate(body) {
-        var direction = vec3.fromValues(body.vx(), body.vy(), body.vz());
-        vec3.normalize(direction, direction);
-
-        var up = getUpVector(direction);
-
-        var lookat = mat4.create();    
-        mat4.lookAt(lookat, vec3.create(), direction, up);
-
-        mat4.multiply(mvmatrix, mvmatrix, lookat);
+    function getPosition(body) {
+        return vec3.fromValues(
+            body.x() - 0.5,
+            body.y() - 0.5,
+            -1.0 - body.z()
+        );
     }
 
-    function getUpVector(direction) {
+    function getVertices(body, position) {
+        var forward, right;
+        forward = vec3.fromValues(body.vx(), body.vy(), body.vz());
+        vec3.normalize(forward, forward);
+        up = getUpVector(forward);
+
+        // scale
+        vec3.scale(forward, forward, SCALE * 1.5);
+        vec3.scale(up, up, SCALE);
+
+        var v0, v1, v2;
+        v0 = vec3.create();
+        v1 = vec3.create();
+        v2 = vec3.create();
+
+        // first vertex is position + forward vector
+        vec3.add(v0, position, forward);
+
+        // second vertex is position - forward vector + up vector
+        vec3.subtract(v1, position, forward);
+        vec3.add(v1, v1, up);
+
+        // third vertex is position - forward vector - up vector
+        vec3.subtract(v2, position, forward);
+        vec3.subtract(v2, v2, up);
+
+        return [v0, v1, v2];
+    }
+
+    function getUpVector(forward) {
         var worldUp = vec3.fromValues(0, 1, 0);
 
         var right = vec3.create();
-        vec3.cross(right, direction, worldUp);
+        vec3.cross(right, forward, worldUp);
         vec3.normalize(right, right);
 
         var up = vec3.create();
-        vec3.cross(up, right, direction);
+        vec3.cross(up, right, forward);
         vec3.normalize(up, up);
 
         return up;
-    }
-
-    function pushMatrix() {
-        mvstack.push(mat4.clone(mvmatrix));
-    }
-
-    function popMatrix() {
-        if (mvstack.length == 0) {
-            throw "Invalid popMatrix!";
-        }
-        mvmatrix = mvstack.pop();
     }
 
     function getShader(gl, id) {
