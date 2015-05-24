@@ -97,3 +97,5 @@ var birds = flock(
 
 [Birds of a Feather](http://jiwonk.im/flocks/demos/birds.html)
 
+[Foggy Flocking in Three Dimensions](http://jiwonk.im/flocks/demos/3d.html)
+
