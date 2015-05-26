@@ -140,9 +140,10 @@ function flock(numBodies, initialSettings) {
         for (var i = 0; i < _bodies.length; i++) {
             _handleOverflow(i);
 
-            _repulse(i);
-            _attract(i);
-            _align(i);
+            _flock(i);
+//            _repulse(i);
+//            _attract(i);
+//            _align(i);
 
             _seek(i);
             _flee(i);
@@ -293,102 +294,123 @@ function flock(numBodies, initialSettings) {
         );
     }
 
-    /**
-     * Repulse the given body away from its neighbors.
-     * @param {number} idx - the index of the body
-     */
-    function _repulse(idx) {
-        var threshold = _getSetting('repulsionThresholdDist');
-        var repulsion = _getSetting('repulsion');
+    function _flock(idx) {
+        var threshold = _getSetting('neighborThresholdDist');
 
         var b1 = _bodies[idx];
-        var dv = {x: 0, y: 0, z: 0};
+        var neighborCount = 0;
+
+        // keeps track of the adjustment of velocity due to repulsion
+        var drepulsion = {x: 0, y: 0, z: 0};
+
+        // keeps track of the sum of neighbors' positions & velocities
+        var sum = {
+            x: 0, y: 0, z: 0,
+            vx: 0, vy: 0, vz: 0
+        };
+
         for (var j = 0; j < _bodies.length; j++) {
             if (j === idx) continue;
             
             var b2 = _bodies[j];
             var dist = _distance(b1, b2);
-            if (dist >= threshold) continue;
-
-            var d = dist / threshold;
-            var mult = (1 - d*d); // max repulsion at zero dist
-
-            dv.x += repulsion * mult * (b1.x() - b2.x());
-            dv.y += repulsion * mult * (b1.y() - b2.y());
-            dv.z += repulsion * mult * (b1.z() - b2.z());
-        }
-
-        b1.vx(b1.vx() + dv.x);
-        b1.vy(b1.vy() + dv.y);
-        b1.vz(b1.vz() + dv.z);
-    }
-
-    /**
-     * Attract the given body towards its neighbors.
-     * @param {number} idx - the index of the body
-     */
-    function _attract(idx) {
-        var threshold = _getSetting('neighborThresholdDist');
-        var attraction = _getSetting('attraction');
-
-        var b1 = _bodies[idx];
-        var sum = {x: 0, y: 0, z: 0};
-        var neighborCount = 0;
-        for (var j = 0; j < _bodies.length; j++) {
-            if (j === idx) continue;
-
-            var b2 = _bodies[j];
-            if (_distance(b1, b2) > threshold) continue;
-
+            if (dist > threshold) continue;
             neighborCount++;
+
+            _updateRepulsionAdjustment(b1, b2, dist, drepulsion);
+
+            // update position sum
             sum.x += b2.x(); 
             sum.y += b2.y();
             sum.z += b2.z();
-        }
-        if (neighborCount === 0) return;
 
+            // update velocity sum
+            sum.vx += b2.vx(); 
+            sum.vy += b2.vy();
+            sum.vz += b2.vz();
+        }
+
+        _repulse(b1, drepulsion);
+        _attract(b1, sum, neighborCount);
+        _align(b1, sum, neighborCount);
+    }
+
+    /**
+     * Update the repulsion adjustment according to the repulsive
+     * influence b2 has on b1
+     *
+     * @param {body} b1 - the body that's changing
+     * @param {body} b2 - the neighbor the body is responding to
+     * @param {number} dist - the distance between b1 and b2
+     * @param {Object} dv - the repulsion adjustment to be updated
+     */
+    function _updateRepulsionAdjustment(b1, b2, dist, dv) {
+        var threshold = _getSetting('repulsionThresholdDist');
+        if (dist > threshold) return;
+
+        var repulsion = _getSetting('repulsion');
+        var d = dist / threshold;
+        var mult = (1 - d*d); // max repulsion at zero dist
+
+        dv.x += repulsion * mult * (b1.x() - b2.x());
+        dv.y += repulsion * mult * (b1.y() - b2.y());
+        dv.z += repulsion * mult * (b1.z() - b2.z());
+    }
+
+    /**
+     * Update the velocity of the given body according to the
+     * repulsion adjustment given.
+     * @param {body} body
+     * @param {Object} dv - the repulsion adjustment
+     */
+    function _repulse(body, dv) {
+        body.vx(body.vx() + dv.x);
+        body.vy(body.vy() + dv.y);
+        body.vz(body.vz() + dv.z);
+    }
+
+    /**
+     * Update the velocity of the given body according to the
+     * centroid computed from the sum of its neighbors' positions,
+     * in order to attract the body towards its neighbors.
+     *
+     * @param {body} body
+     * @param {Object} sum
+     * @param {number} neighborCount
+     */
+    function _attract(body, sum, neighborCount) {
+        if (neighborCount === 0) return;
+        var attraction = _getSetting('attraction');
         var centroid = {
             x: sum.x / neighborCount,
             y: sum.y / neighborCount,
             z: sum.z / neighborCount
         }
-        b1.vx(b1.vx() + (centroid.x - b1.x()) * attraction);
-        b1.vy(b1.vy() + (centroid.y - b1.y()) * attraction);
-        b1.vz(b1.vz() + (centroid.z - b1.z()) * attraction);
+        body.vx(body.vx() + (centroid.x - body.x()) * attraction);
+        body.vy(body.vy() + (centroid.y - body.y()) * attraction);
+        body.vz(body.vz() + (centroid.z - body.z()) * attraction);
     }
 
     /**
-     * Align the given body with its neighbors.
-     * @param {number} idx - the index of the body
+     * Update the velocity of the given body according to the
+     * centroid computed from the sum of its neighbors' velocities,
+     * in order to align the given body with its neighbors.
+     *
+     * @param {body} body
+     * @param {Object} sum
+     * @param {number} neighborCount
      */
-    function _align(idx) {
-        var threshold = _getSetting('neighborThresholdDist');
-        var alignment = _getSetting('alignment');
-
-        var b1 = _bodies[idx];
-        var sum = {vx: 0, vy: 0, vz: 0};
-        var neighborCount = 0;
-        for (var j = 0; j < _bodies.length; j++) {
-            if (j === idx) continue;
-
-            var b2 = _bodies[j];
-            if (_distance(b1, b2) > threshold) continue;
-
-            neighborCount++;
-            sum.vx += b2.vx(); 
-            sum.vy += b2.vy();
-            sum.vz += b2.vz();
-        }
+    function _align(body, sum, neighborCount) {
         if (neighborCount === 0) return;
-
+        var alignment = _getSetting('alignment');
         var avg = {
             vx: sum.vx / neighborCount,
             vy: sum.vy / neighborCount,
             vz: sum.vz / neighborCount
         }
-        b1.vx(b1.vx() + (avg.vx - b1.vx()) * alignment);
-        b1.vy(b1.vy() + (avg.vy - b1.vy()) * alignment);
-        b1.vz(b1.vz() + (avg.vz - b1.vz()) * alignment);
+        body.vx(body.vx() + (avg.vx - body.vx()) * alignment);
+        body.vy(body.vy() + (avg.vy - body.vy()) * alignment);
+        body.vz(body.vz() + (avg.vz - body.vz()) * alignment);
     }
 
     /**
