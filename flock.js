@@ -188,7 +188,7 @@ function flock(numBodies, initialSettings) {
      * @param {Object} val - settings
      */
     function _initSettings(val) {
-        if (settings === undefined) {
+        if (val === undefined) {
             return DEFAULT_SETTINGS;
         }
         return {
