@@ -11,7 +11,7 @@ $(document).ready(function() {
             repulsionThresholdDist: 0.01,
             attraction: 0.001,
             dimensions: 3,
-            overflow: OVERFLOW_SETTINGS.BIND
+            overflow: 'bind' 
         }
     );
 
