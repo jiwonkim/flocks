@@ -18,7 +18,7 @@
             var canvas = document.getElementById('ocean-canvas');
             var context = canvas.getContext('2d');
 
-            var school = flock(200, {overflow: OVERFLOW_SETTINGS.WRAP});
+            var school = flock(200, {overflow: 'wrap'});
 
             $(window).keypress(function(evt) {
                 if (evt.which === 32) { // the spacebar
