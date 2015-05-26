@@ -1,25 +1,25 @@
-var OVERFLOW_SETTINGS = {
-    BIND: 'bind',
-    WRAP: 'wrap',
-    BOUNCE: 'bounce'
-}
-var DEFAULT_SETTINGS = {
-    neighborThresholdDist: 0.2,
-    repulsionThresholdDist: 0.05,
-    repulsion: 0.2,
-    attraction: 0.01,
-    alignment: 0.01,
-    targetSpeed: 0.05,
-    targetSpeedMultiplier: 0.15,
-    dimensions: 2,
-    overflow: OVERFLOW_SETTINGS.BIND
-}
-
 /**
  * @param {number} numBodies
  * @param {Object=} initialSettings
+ * @param
  */
 function flock(numBodies, initialSettings) {
+    var OVERFLOW_OPTIONS = {
+        BIND: 'bind',
+        WRAP: 'wrap',
+        BOUNCE: 'bounce'
+    };
+    var DEFAULT_SETTINGS = {
+        neighborThresholdDist: 0.2,
+        repulsionThresholdDist: 0.05,
+        repulsion: 0.2,
+        attraction: 0.01,
+        alignment: 0.01,
+        targetSpeed: 0.05,
+        targetSpeedMultiplier: 0.15,
+        dimensions: 2,
+        overflow: OVERFLOW_OPTIONS.BIND
+    };
     var _settings = _initSettings(initialSettings);
     var _tmpSettings = null;
     var _fascination = null;
@@ -250,26 +250,26 @@ function flock(numBodies, initialSettings) {
     }
 
     /**
-     *
+     * Handles the behavior when the body at idx is out of bounds.
+     * @param {number} idx
      */
     function _handleOverflow(idx) {
         var b = _bodies[idx];
         if (_inBounds(b)) {
             return;
         }
-
         var overflow = _getSetting('overflow');
-        if (overflow === OVERFLOW_SETTINGS.WRAP) {
+        if (overflow === OVERFLOW_OPTIONS.WRAP) {
             b.x((1 + b.x()) % 1);
             b.y((1 + b.y()) % 1);
             b.z((1 + b.z()) % 1);
-        } else if (overflow === OVERFLOW_SETTINGS.BIND) {
+        } else if (overflow === OVERFLOW_OPTIONS.BIND) {
             var diff = [0.5 - b.x(), 0.5 - b.y(), 0.5 - b.z()];
             b.vx(b.vx() + diff[0] * 0.001);
             b.vy(b.vy() + diff[1] * 0.001);
             b.vz(b.vz() + diff[2] * 0.001);
             
-        } else if (overflow === OVERFLOW_SETTINGS.BOUNCE) {
+        } else if (overflow === OVERFLOW_OPTIONS.BOUNCE) {
             if (b.x() > 1 && b.vx() > 0) {
                 b.vx(-b.vx());
             }
@@ -282,6 +282,9 @@ function flock(numBodies, initialSettings) {
         }
     }
 
+    /**
+     * Returns true if the body is within bounds.
+     */
     function _inBounds(body) {
         return (
             body.x() >= 0 && body.x() <= 1 &&

@@ -197,6 +197,16 @@
                         <p>Bigger the value, the faster a body converges to the target speed.</p>
                     </td>
                 </tr>
+                <tr>
+                    <td><pre>overflow</pre></td>
+                    <td>
+                        <p>Default: <code>'bind'</code></p>
+                        <p>Defines the behavior of a body in the flock when it goes out of bounds. Possible values are <code>'bind'</code>, <code>'wrap'</code>, and <code>'bounce'</code>.</p>
+                        <p><code>'bind'</code> makes it so that the body feels a pull to the center of flock-space when it's out of bounds. This typically results in orbit-like behavior of the flock around the center.</p>
+                        <p><code>'wrap'</code> makes it so that if a body disappears off the bottom, it reappears at the top, etc.</p>
+                        <p><code>'bounce'</code> makes the flock bounce off invisible walls.</p>
+                    </td>
+                </tr>
             </table>
             <p>For example, the following is used in the <a href="demos/birds.html">Birds of a Feather</a> demo to make the flock behave more like birds than a school of fish:<p>
             <pre><code class="hljs javascript">var birds = flock(

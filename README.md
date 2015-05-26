@@ -73,23 +73,8 @@ When `flock` is invoked with no arguments, the default settings are used. But yo
 | `alignment` | `0.01` | Bigger the value, the stronger the tendency for each body to head towards the same direction as its neighbors. |
 | `targetSpeed` | `0.05` | If a body is traveling faster or slower than the target speed, it slows down or speeds up repectively to match the target speed. |
 | `targetSpeedMultiplier` | `0.15` | Bigger the value, the faster a body converges to the target speed. |
+| `overflow` | `'bind'` | Defines the behavior of a body in the flock when it goes out of bounds. Possible values are `'bind'`, `'wrap'`, and `'bounce'`.  `'bind'` makes it so that the body feels a pull to the center of flock-space when it's out of bounds. This typically results in orbit-like behavior of the flock around the center. `wrap` makes it so that if a body disappears off the bottom, it reappears at the top, etc. `'bounce'` makes the flock bounce off invisible walls. |
 
-For example, the following is used in the [Birds of a Feather](http://jiwonk.im/flocks/demos/birds.html) demo to make the flock behave more like birds than a school of fish:
-
-```javascript
-var birds = flock(
-    NUM_BIRDS,
-    {
-        neighborThresholdDist: 0.1,
-        repulsionThresholdDist: 0.005,
-        repulsion: 0.01,
-        attraction: 0.05,
-        alignment: 0.001,
-        targetSpeed: 0.002,
-        targetSpeedMultiplier: 0.1
-    }
-);
-```
 
 ## Demos
 
@@ -98,4 +83,5 @@ var birds = flock(
 [Birds of a Feather](http://jiwonk.im/flocks/demos/birds.html)
 
 [Foggy Flocking in Three Dimensions](http://jiwonk.im/flocks/demos/3d.html)
+
 
